@@ -21,7 +21,7 @@ contract BeeKeeperRole {
 
     // Define a modifier that checks to see if msg.sender has the appropriate role
     modifier onlyHarvester() {
-        require(isHarvester(msg.sender));
+        require(isHarvester(msg.sender), "Is not Harvester");
         _;
     }
 
