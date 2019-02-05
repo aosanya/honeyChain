@@ -4,7 +4,7 @@ pragma solidity ^0.4.24;
 import "./Roles.sol";
 
 // Define a contract 'HarvesterRole' to manage this role - add, remove, check
-contract BeeKeeperRole {
+contract HarvesterRole {
     using Roles for Roles.Role;
 
     // Define 2 events, one for Adding, and other for Removing

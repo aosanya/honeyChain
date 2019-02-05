@@ -61,6 +61,8 @@ contract('SupplyChain', function(accounts) {
         const resultBufferOne = await supplyChain.fetchItemBufferOne.call(upc)
         const resultBufferTwo = await supplyChain.fetchItemBufferTwo.call(upc)
 
+        console.log(Number(resultBufferOne[0]))
+        console.log(Number(resultBufferTwo[0]))
         // Verify the result set
         assert.equal(resultBufferOne[0], sku, 'Error: Invalid item SKU')
         assert.equal(resultBufferOne[1], upc, 'Error: Invalid item UPC')

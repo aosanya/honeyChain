@@ -14,7 +14,7 @@ library Roles {
     */
     function add(Role storage role, address account) internal {
         require(account != address(0), "Cannot add address of contract owner");
-        require(!has(role, account));
+        require(!has(role, account), "Already has an account");
 
         role.bearer[account] = true;
     }
@@ -24,7 +24,7 @@ library Roles {
     */
     function remove(Role storage role, address account) internal {
         require(account != address(0), "Cannot remove address of contract owner");
-        require(has(role, account));
+        require(has(role, account), "Account does not exist");
 
         role.bearer[account] = false;
     }
