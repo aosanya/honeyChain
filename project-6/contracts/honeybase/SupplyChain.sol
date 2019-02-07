@@ -11,24 +11,36 @@ contract SupplyChain {
     // Define a variable called 'sku' for Stock Keeping Unit (SKU)
     uint  sku;
 
-    // Define a public mapping 'items' that maps the UPC to an Item.
+    uint  orderId;
+
+    uint quoteId;
+
+    // Define a public mapping 'harvests' that maps the UPC to a Harvest.
     mapping (uint => Harvest) harvests;
 
-    // Define a public mapping 'itemsHistory' that maps the UPC to an array of TxHash,
+    // Define a public mapping 'orders' that maps the UPC to an Order.
+    mapping (uint => Order) orders;
+
+    // Define a public mapping 'quotes' that maps the orderId to a quote.
+    mapping (uint => Quote) quotes;
+
+    // Define a public mapping 'purchases' that maps the purchaseId to a purchase.
+    mapping (uint => Purchase) purchases;
+
+    // Define a public mapping 'harvestsHistory' that maps the UPC to an array of TxHash,
     // that track its journey through the supply chain -- to be sent from DApp.
-    mapping (uint => string[]) itemsHistory;
+    mapping (uint => string[]) harvestsHistory;
 
     // Define enum 'State' with the following values:
     enum State
     {
-        Harvested,  // 0
-        Processed,  // 1
-        Packed,     // 2
-        ForSale,    // 3
-        Sold,       // 4
-        Shipped,    // 5
-        Received,   // 6
-        Purchased   // 7
+        Harvested,              // 0
+        PlacedOrder,            // 1
+        SentQuote,              // 2
+        CommitedToPurchase,     // 3
+        PickedUpHoney,          // 4
+        DeliveredHoney,         // 5
+        ReleasedPayment         // 6
     }
 
     State constant defaultState = State.Harvested;
@@ -43,24 +55,46 @@ contract SupplyChain {
         string  originFarmInformation;  // BeeKeeper Information
         string  originFarmLatitude; // Farm Latitude
         string  originFarmLongitude;  // Farm Longitude
+        uint    quantity; // Quantity in milliliters
         uint    productID;  // Product ID potentially a combination of upc + sku
         string  productNotes; // Product Notes
         uint    productPrice; // Product Price
-        State   itemState;  // Product State as represented in the enum above
+        State   harvestState;  // Product State as represented in the enum above
         address harvesterID;  // Metamask-Ethereum address of the Harvester
         address shipperID; // Metamask-Ethereum address of the Shipper
         address buyerID; // Metamask-Ethereum address of the Buyer
     }
 
+    struct Order {
+        uint    orderId;
+        address buyerId;
+        uint    upc;
+        uint    quantity;
+    }
+
+    struct Quote {
+        uint    quoteId;
+        uint    orderId;
+        uint    price;
+        uint    shippingCost;
+    }
+
+    struct Purchase {
+        uint    purchaseId;
+        uint    quoteId;
+
+    }
+
+
+
     // Define 8 events with the same 8 state values and accept 'upc' as input argument
     event Harvested(uint upc);
-    event Processed(uint upc);
-    event Packed(uint upc);
-    event ForSale(uint upc);
-    event Sold(uint upc);
-    event Shipped(uint upc);
-    event Received(uint upc);
-    event Purchased(uint upc);
+    event PlacedOrder(uint orderId,uint quantity);
+    event SentQuote(uint upc);
+    event CommitedToPurchase(uint upc);
+    event PickedUpHoney(uint upc);
+    event DeliveredHoney(uint upc);
+    event ReleasedPayment(uint upc);
 
     // Define a modifer that checks to see if msg.sender == owner of the contract
     modifier onlyOwner() {
@@ -83,56 +117,50 @@ contract SupplyChain {
     // Define a modifier that checks the price and refunds the remaining balance
     modifier checkValue(uint _upc) {
         _;
-        uint _price = items[_upc].productPrice;
+        uint _price = harvests[_upc].productPrice;
         uint amountToReturn = msg.value - _price;
-        items[_upc].buyerID.transfer(amountToReturn);
+        harvests[_upc].buyerID.transfer(amountToReturn);
     }
 
-    // Define a modifier that checks if an item.state of a upc is Harvested
+    // Define a modifier that checks if an harvest.state of a upc is Harvested
     modifier harvested(uint _upc) {
-        require(items[_upc].itemState == State.Harvested);
+        require(harvests[_upc].harvestState == State.Harvested);
         _;
     }
 
-    // Define a modifier that checks if an item.state of a upc is Processed
-    modifier processed(uint _upc) {
-
+    // Define a modifier that checks if an harvest.state of a upc is PlacedOrder
+    modifier placedOrder(uint _upc) {
+        require(harvests[_upc].harvestState == State.PlacedOrder);
         _;
     }
 
-    // Define a modifier that checks if an item.state of a upc is Packed
-    modifier packed(uint _upc) {
-
+    // Define a modifier that checks if an harvest.state of a upc is SentQuote
+    modifier sentQuote(uint _upc) {
+        require(harvests[_upc].harvestState == State.SentQuote);
         _;
     }
 
-    // Define a modifier that checks if an item.state of a upc is ForSale
-    modifier forSale(uint _upc) {
-
+    // Define a modifier that checks if an harvest.state of a upc is CommitedToPurchase
+    modifier commitedToPurchase(uint _upc) {
+        require(harvests[_upc].harvestState == State.CommitedToPurchase);
         _;
     }
 
-    // Define a modifier that checks if an item.state of a upc is Sold
-    modifier sold(uint _upc) {
-
+    // Define a modifier that checks if an harvest.state of a upc is PickedUpHoney
+    modifier pickedUpHoney(uint _upc) {
+        require(harvests[_upc].harvestState == State.PickedUpHoney);
         _;
     }
 
-    // Define a modifier that checks if an item.state of a upc is Shipped
-    modifier shipped(uint _upc) {
-
+    // Define a modifier that checks if an harvest.state of a upc is DeliveredHoney
+    modifier deliveredHoney(uint _upc) {
+        require(harvests[_upc].harvestState == State.DeliveredHoney);
         _;
     }
 
-    // Define a modifier that checks if an item.state of a upc is Received
-    modifier received(uint _upc) {
-
-        _;
-    }
-
-    // Define a modifier that checks if an item.state of a upc is Purchased
-    modifier purchased(uint _upc) {
-
+    // Define a modifier that checks if an harvest.state of a upc is ReleasedPayment
+    modifier releasedPayment(uint _upc) {
+        require(harvests[_upc].harvestState == State.ReleasedPayment);
         _;
     }
 
@@ -143,6 +171,8 @@ contract SupplyChain {
         owner = msg.sender;
         sku = 1;
         upc = 1;
+        orderId = 1;
+        quoteId = 1;
     }
 
     // Define a function 'kill' if required
@@ -152,11 +182,11 @@ contract SupplyChain {
         }
     }
 
-    // Define a function 'harvestItem' that allows a farmer to mark an item 'Harvested'
-    function harvestItem(uint _upc, address _harvesterID, address _originBeekeeperID, string _originBeekeeperName, string _originFarmInformation, string  _originFarmLatitude, string  _originFarmLongitude, string  _productNotes) public
+    // Define a function 'harvestItem' that allows a farmer to mark an harvest 'Harvested'
+    function harvestItem(uint _upc, address _harvesterID, address _originBeekeeperID, string _originBeekeeperName, string _originFarmInformation, string  _originFarmLatitude, string  _originFarmLongitude, uint _quantity, string  _productNotes) public
     {
-        // Add the new item as part of Harvest
-        Harvest storage harvest_ = Harvests[sku];
+        // Add the new harvest as part of Harvest
+        Harvest storage harvest_ = harvests[_upc];
         harvest_.sku = sku;
         harvest_.upc = upc;
         harvest_.ownerID = owner;
@@ -165,153 +195,141 @@ contract SupplyChain {
         harvest_.originFarmInformation = _originFarmInformation;
         harvest_.originFarmLatitude = _originFarmLatitude;
         harvest_.originFarmLongitude = _originFarmLongitude;
+        harvest_.quantity = _quantity;
         harvest_.productNotes = _productNotes;
-        harvest_.itemState = defaultState;
+        harvest_.harvestState = defaultState;
         harvest_.harvesterID = _harvesterID;
 
         // Increment sku
         sku = sku + 1;
 
-        // Emit the appropriate event
         emit Harvested(upc);
     }
 
-    // Define a function 'processtItem' that allows a farmer to mark an item 'Processed'
-    function processItem(uint _upc) public
+    // Define a function 'processtItem' that allows a farmer to mark an harvest 'Processed'
+    function placeOrder(address buyerId, uint _upc, uint quantity) public
     // Call modifier to check if upc has passed previous supply chain stage
 
     // Call modifier to verify caller of this function
 
     {
-      // Update the appropriate fields
+        Order storage order_ = orders[orderId];
+        order_.orderId = orderId;
+        order_.buyerId = buyerId;
+        order_.upc = upc;
+        order_.quantity = quantity;
 
-      // Emit the appropriate event
-
+        emit PlacedOrder(orderId, quantity);
+        orderId = orderId + 1;
     }
 
-    // Define a function 'packItem' that allows a farmer to mark an item 'Packed'
-    function packItem(uint _upc) public
+    // Define a function 'packItem' that allows a farmer to mark an harvest 'Packed'
+    function sendQuote(uint _orderId, uint _price, uint _shippingCost) public
     // Call modifier to check if upc has passed previous supply chain stage
 
     // Call modifier to verify caller of this function
 
     {
-      // Update the appropriate fields
+        Quote storage quote_ = quotes[quoteId];
+        quote_.quoteId = quoteId;
+        quote_.orderId = _orderId;
+        quote_.price = _price;
+        quote_.shippingCost = _shippingCost;
 
-      // Emit the appropriate event
-
+        emit SentQuote(quoteId);
+        quoteId = quoteId + 1;
     }
 
-    // Define a function 'sellItem' that allows a farmer to mark an item 'ForSale'
-    function sellItem(uint _upc, uint _price) public
+    // Define a function 'sellItem' that allows a farmer to mark an harvest 'ForSale'
+    function commitToPurchase(uint _upc, uint _price) public
     // Call modifier to check if upc has passed previous supply chain stage
 
     // Call modifier to verify caller of this function
 
     {
-      // Update the appropriate fields
+        // Update the appropriate fields
 
-      // Emit the appropriate event
-
-    }
-
-    // Define a function 'buyItem' that allows the disributor to mark an item 'Sold'
-    // Use the above defined modifiers to check if the item is available for sale, if the buyer has paid enough,
-    // and any excess ether sent is refunded back to the buyer
-    function buyItem(uint _upc) public payable
-      // Call modifier to check if upc has passed previous supply chain stage
-
-      // Call modifer to check if buyer has paid enough
-
-      // Call modifer to send any excess ether back to buyer
-
-      {
-
-      // Update the appropriate fields - ownerID, harvesterID, itemState
-
-      // Transfer money to farmer
-
-      // emit the appropriate event
+        emit CommitedToPurchase(upc);
 
     }
 
-    // Define a function 'shipItem' that allows the harvester to mark an item 'Shipped'
-    // Use the above modifers to check if the item is sold
-    function shipItem(uint _upc) public
+    // Define a function 'pickUpHoney' that allows the harvester to mark an harvest 'PickedUpHoney'
+    // Use the above modifers to check if the harvest is sold
+    function pickUpHoney(uint _upc) public
       // Call modifier to check if upc has passed previous supply chain stage
 
       // Call modifier to verify caller of this function
 
-      {
-      // Update the appropriate fields
+    {
+        // Update the appropriate fields
 
-      // Emit the appropriate event
-
-    }
-
-    // Define a function 'receiveItem' that allows the shipper to mark an item 'Received'
-    // Use the above modifiers to check if the item is shipped
-    function receiveItem(uint _upc) public
-      // Call modifier to check if upc has passed previous supply chain stage
-
-      // Access Control List enforced by calling Smart Contract / DApp
-      {
-      // Update the appropriate fields - ownerID, shipperID, itemState
-
-      // Emit the appropriate event
+        emit PickedUpHoney(upc);
 
     }
 
-    // Define a function 'purchaseItem' that allows the buyer to mark an item 'Purchased'
-    // Use the above modifiers to check if the item is received
-    function purchaseItem(uint _upc) public
-      // Call modifier to check if upc has passed previous supply chain stage
+    // Define a function 'receiveItem' that allows the shipper to mark an harvest 'Received'
+    // Use the above modifiers to check if the harvest is shipped
+    function deliverHoney(uint _upc) public
+    // Call modifier to check if upc has passed previous supply chain stage
 
-      // Access Control List enforced by calling Smart Contract / DApp
-      {
-      // Update the appropriate fields - ownerID, buyerID, itemState
+    // Access Control List enforced by calling Smart Contract / DApp
+    {
+        // Update the appropriate fields - ownerID, shipperID, harvestState
 
-      // Emit the appropriate event
+        emit DeliveredHoney(upc);
+
+    }
+
+    // Define a function 'purchaseItem' that allows the buyer to mark an harvest 'Purchased'
+    // Use the above modifiers to check if the harvest is received
+    function releasePayment(uint _upc) public
+    // Call modifier to check if upc has passed previous supply chain stage
+
+    // Access Control List enforced by calling Smart Contract / DApp
+    {
+        // Update the appropriate fields - ownerID, buyerID, harvestState
+
+        emit ReleasedPayment(upc);
 
     }
 
     // Define a function 'fetchItemBufferOne' that fetches the data
     function fetchItemBufferOne(uint _upc) public view returns
     (
-    uint    itemSKU,
-    uint    itemUPC,
+    uint    harvestSKU,
+    uint    harvestUPC,
     address ownerID,
     address originBeekeeperID,
     string  originBeekeeperName,
     string  originFarmInformation,
     string  originFarmLatitude,
-    string  originFarmLongitude
+    string  originFarmLongitude,
+    uint    quantity
     )
     {
       // Assign values to the 8 parameters
 
-        return
-        (
-        itemSKU,
-        itemUPC,
-        ownerID,
-        originBeekeeperID,
-        originBeekeeperName,
-        originFarmInformation,
-        originFarmLatitude,
-        originFarmLongitude
-        );
+        Harvest storage harvest_ = harvests[_upc];
+        harvestSKU = harvest_.sku;
+        harvestUPC = harvest_.upc;
+        ownerID = harvest_.ownerID;
+        originBeekeeperID = harvest_.originBeekeeperID;
+        originBeekeeperName = harvest_.originBeekeeperName;
+        originFarmInformation = harvest_.originFarmInformation;
+        originFarmLatitude = harvest_.originFarmLatitude;
+        originFarmLongitude = harvest_.originFarmLongitude;
+        quantity = harvest_.quantity;
     }
 
     // Define a function 'fetchItemBufferTwo' that fetches the data
     function fetchItemBufferTwo(uint _upc) public view returns
     (
-    uint    itemSKU,
-    uint    itemUPC,
+    uint    harvestSKU,
+    uint    harvestUPC,
     uint    productID,
     string  productNotes,
     uint    productPrice,
-    uint    itemState,
+    uint    harvestState,
     address harvesterID,
     address shipperID,
     address buyerID
@@ -320,15 +338,47 @@ contract SupplyChain {
       // Assign values to the 9 parameters
         return
         (
-        itemSKU,
-        itemUPC,
+        harvestSKU,
+        harvestUPC,
         productID,
         productNotes,
         productPrice,
-        itemState,
+        harvestState,
         harvesterID,
         shipperID,
         buyerID
         );
+    }
+
+    // Define a function 'fetchItemBufferOne' that fetches the data
+    function fetchOrder(uint _orderId) public view returns
+    (
+    uint    orderId,
+    address buyerId,
+    uint    harvestUPC,
+    uint    quantity
+    )
+    {
+        Order storage order_ = orders[_orderId];
+        orderId = order_.orderId;
+        buyerId = order_.buyerId;
+        harvestUPC = order_.upc;
+        quantity = order_.quantity;
+    }
+
+    // Define a function 'fetchItemBufferOne' that fetches the data
+    function fetchQuote(uint _quoteId) public view returns
+    (
+    uint    quoteId,
+    uint    orderId,
+    uint    price,
+    uint    shippingCost
+    )
+    {
+        Quote storage quote_ = quotes[_quoteId];
+        quoteId = quote_.quoteId;
+        orderId = quote_.orderId;
+        price = quote_.price;
+        shippingCost = quote_.shippingCost;
     }
 }

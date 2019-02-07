@@ -12,6 +12,14 @@ contract('SupplyChain', function(accounts) {
     const originBeeKeeperInformation = "Alego Nyajuok"
     const originBeeKeeperLatitude = "-38.239770"
     const originBeeKeeperLongitude = "144.341490"
+    const buyerId = accounts[2]
+    const quantity = 10000
+    //
+    const order1 = quantity / 2
+    const price1 = 10
+    const shippingCost1 = 1
+    //
+
     var productID = sku + upc
     const productNotes = "Sweetest honey from natural nectar"
     const productPrice = web3.toWei(1, "ether")
@@ -41,202 +49,188 @@ contract('SupplyChain', function(accounts) {
     console.log("Shipper: accounts[3] ", accounts[3])
     console.log("Buyer: accounts[4] ", accounts[4])
 
-    // 1st Test
-    it("Testing smart contract function harvestItem() that allows a harvester to harvest honey", async() => {
-        const supplyChain = await SupplyChain.deployed()
+    context('harvest Honey', () => {
+        // 1st Test
+        it("Testing smart contract function harvestItem() that allows a harvester to harvest honey", async() => {
+            const supplyChain = await SupplyChain.deployed()
+            // Declare and Initialize a variable for event
+            var eventEmitted = false
 
-        // Declare and Initialize a variable for event
-        var eventEmitted = false
+            // Watch the emitted event Harvested()
+            var event = supplyChain.Harvested({fromBlock: 0})
 
-        // Watch the emitted event Harvested()
-        var event = supplyChain.Harvested()
-        await event.watch((err, res) => {
-            eventEmitted = true
+            await event.watch((err, res) => {
+                eventEmitted = true
+            })
+
+
+
+            // Mark an item as Harvested by calling function harvestItem()
+            await supplyChain.harvestItem(upc, harvesterID, originBeeKeeperID, originBeeKeeperName, originBeeKeeperInformation, originBeeKeeperLatitude, originBeeKeeperLongitude, quantity, productNotes)
+
+            // Retrieve the just now saved item from blockchain by calling function fetchItem()
+            const resultBufferOne = await supplyChain.fetchItemBufferOne.call(upc)
+            const resultBufferTwo = await supplyChain.fetchItemBufferTwo.call(upc)
+            // Verify the result set
+            assert.equal(resultBufferOne[0], sku, 'Error: Invalid item SKU')
+            assert.equal(resultBufferOne[1], upc, 'Error: Invalid item UPC')
+            assert.equal(resultBufferOne[2], ownerID, 'Error: Missing or Invalid ownerID')
+            assert.equal(resultBufferOne[3], originBeeKeeperID, 'Error: Missing or Invalid originBeekeeperID')
+            assert.equal(resultBufferOne[4], originBeeKeeperName, 'Error: Missing or Invalid originBeekeeperName')
+            assert.equal(resultBufferOne[5], originBeeKeeperInformation, 'Error: Missing or Invalid originFarmInformation')
+            assert.equal(resultBufferOne[6], originBeeKeeperLatitude, 'Error: Missing or Invalid originFarmLatitude')
+            assert.equal(resultBufferOne[7], originBeeKeeperLongitude, 'Error: Missing or Invalid originFarmLongitude')
+            assert.equal(resultBufferOne[8], quantity, 'Error: Missing or Quantity')
+            assert.equal(resultBufferTwo[5], 0, 'Error: Invalid item State')
+            //assert.equal(eventEmitted, true, 'Invalid event emitted')
+        })
+    })
+
+    context('place Order', () => {
+        var supplyChain
+        before(async () => {
+            supplyChain = await SupplyChain.deployed()
+
+            // Watch the emitted event PlacedOrder()
+            var event = supplyChain.PlacedOrder()
+
+            await event.watch((err, res) => {
+                eventEmitted = true
+            })
+
+            await supplyChain.harvestItem(upc, harvesterID, originBeeKeeperID, originBeeKeeperName, originBeeKeeperInformation, originBeeKeeperLatitude, originBeeKeeperLongitude, quantity, productNotes)
         })
 
-        // Mark an item as Harvested by calling function harvestItem()
-        await supplyChain.harvestItem(upc, originBeeKeeperID, originBeeKeeperName, originBeeKeeperInformation, originBeeKeeperLatitude, originBeeKeeperLongitude, productNotes)
+        it("Testing smart contract function placeOrder() that allows a buyer to buy honey", async() => {
 
-        // Retrieve the just now saved item from blockchain by calling function fetchItem()
-        const resultBufferOne = await supplyChain.fetchItemBufferOne.call(upc)
-        const resultBufferTwo = await supplyChain.fetchItemBufferTwo.call(upc)
+            await supplyChain.placeOrder(buyerId, upc, order1)
 
-        console.log(Number(resultBufferOne[0]))
-        console.log(Number(resultBufferTwo[0]))
-        // Verify the result set
-        assert.equal(resultBufferOne[0], sku, 'Error: Invalid item SKU')
-        assert.equal(resultBufferOne[1], upc, 'Error: Invalid item UPC')
-        assert.equal(resultBufferOne[2], originBeeKeeperID, 'Error: Missing or Invalid ownerID')
-        assert.equal(resultBufferOne[3], originBeeKeeperID, 'Error: Missing or Invalid originBeekeeperID')
-        assert.equal(resultBufferOne[4], originBeeKeeperName, 'Error: Missing or Invalid originBeekeeperName')
-        assert.equal(resultBufferOne[5], originBeeKeeperInformation, 'Error: Missing or Invalid originFarmInformation')
-        assert.equal(resultBufferOne[6], originBeeKeeperLatitude, 'Error: Missing or Invalid originFarmLatitude')
-        assert.equal(resultBufferOne[7], originBeeKeeperLongitude, 'Error: Missing or Invalid originFarmLongitude')
-        assert.equal(resultBufferTwo[5], 0, 'Error: Invalid item State')
-        assert.equal(eventEmitted, true, 'Invalid event emitted')
+            const resultOrder1 = await supplyChain.fetchOrder(1)
+            assert.equal(resultOrder1[0], 1, 'Error: Invalid OrderId')
+            assert.equal(resultOrder1[1], buyerId, 'Error: Invalid BuyerId')
+            assert.equal(resultOrder1[2], upc, 'Error: Invalid UPC')
+            assert.equal(resultOrder1[3], order1, 'Error: Invalid Quantity')
+            // Mark an item as Processed by calling function processtItem()
+
+
+            // Retrieve the just now saved item from blockchain by calling function fetchItem()
+
+
+            // Verify the result set
+
+        })
     })
 
-    // 2nd Test
-    it("Testing smart contract function processItem() that allows a farmer to process honey", async() => {
-        const supplyChain = await SupplyChain.deployed()
+    context('send quote', () => {
+        var supplyChain
 
-        // Declare and Initialize a variable for event
+        before(async () => {
+            supplyChain = await SupplyChain.deployed()
 
+            // Watch the emitted event Harvested()
+            var event = supplyChain.SentQuote({fromBlock: 0})
 
-        // Watch the emitted event Processed()
+            await event.watch((err, res) => {
+                eventEmitted = true
+            })
 
+            await supplyChain.harvestItem(upc, harvesterID, originBeeKeeperID, originBeeKeeperName, originBeeKeeperInformation, originBeeKeeperLatitude, originBeeKeeperLongitude, quantity, productNotes)
+            await supplyChain.placeOrder(buyerId, upc, order1)
+        })
 
-        // Mark an item as Processed by calling function processtItem()
+        it("Testing smart contract function sendQuote() that allows a harvester to sendQuote", async() => {
+            await supplyChain.sendQuote(1, price1, shippingCost1)
 
-
-        // Retrieve the just now saved item from blockchain by calling function fetchItem()
-
-
-        // Verify the result set
-
+            const resultOrder1 = await supplyChain.fetchQuote(1)
+            assert.equal(resultOrder1[0], 1, 'Error: Invalid QuoteId')
+            assert.equal(resultOrder1[1], 1, 'Error: Invalid OrderId')
+            assert.equal(resultOrder1[2], price1, 'Error: Invalid Price')
+            assert.equal(resultOrder1[3], shippingCost1, 'Error: Invalid Shipping Cost')
+        })
     })
 
-    // 3rd Test
-    it("Testing smart contract function packItem() that allows a farmer to pack honey", async() => {
-        const supplyChain = await SupplyChain.deployed()
+    context('commit to purchase', () => {
+        var supplyChain
 
-        // Declare and Initialize a variable for event
+        before(async () => {
+            supplyChain = await SupplyChain.deployed()
 
+            // Watch the emitted event Harvested()
+            var event = supplyChain.Harvested({fromBlock: 0})
 
-        // Watch the emitted event Packed()
+            await event.watch((err, res) => {
+                eventEmitted = true
+            })
 
+            await supplyChain.harvestItem(upc, harvesterID, originBeeKeeperID, originBeeKeeperName, originBeeKeeperInformation, originBeeKeeperLatitude, originBeeKeeperLongitude, quantity, productNotes)
+        })
 
-        // Mark an item as Packed by calling function packItem()
+        it("Testing smart contract function commitToPurchase() that allows a harvester to sendQuote", async() => {
 
-
-        // Retrieve the just now saved item from blockchain by calling function fetchItem()
-
-
-        // Verify the result set
-
+        })
     })
 
-    // 4th Test
-    it("Testing smart contract function sellItem() that allows a farmer to sell honey", async() => {
-        const supplyChain = await SupplyChain.deployed()
+    context('pick up honey', () => {
+        var supplyChain
 
-        // Declare and Initialize a variable for event
+        before(async () => {
+            supplyChain = await SupplyChain.deployed()
 
+            // Watch the emitted event Harvested()
+            var event = supplyChain.Harvested({fromBlock: 0})
 
-        // Watch the emitted event ForSale()
+            await event.watch((err, res) => {
+                eventEmitted = true
+            })
 
+            await supplyChain.harvestItem(upc, harvesterID, originBeeKeeperID, originBeeKeeperName, originBeeKeeperInformation, originBeeKeeperLatitude, originBeeKeeperLongitude, quantity, productNotes)
+        })
 
-        // Mark an item as ForSale by calling function sellItem()
+        it("Testing smart contract function pickUpHoney() that allows a shipper to pick up honey", async() => {
 
-
-        // Retrieve the just now saved item from blockchain by calling function fetchItem()
-
-
-        // Verify the result set
-
+        })
     })
 
-    // 5th Test
-    it("Testing smart contract function buyItem() that allows a harvester to buy honey", async() => {
-        const supplyChain = await SupplyChain.deployed()
+    context('deliver honey', () => {
+        var supplyChain
 
-        // Declare and Initialize a variable for event
+        before(async () => {
+            supplyChain = await SupplyChain.deployed()
 
+            // Watch the emitted event Harvested()
+            var event = supplyChain.Harvested({fromBlock: 0})
 
-        // Watch the emitted event Sold()
-        var event = supplyChain.Sold()
+            await event.watch((err, res) => {
+                eventEmitted = true
+            })
 
+            await supplyChain.harvestItem(upc, harvesterID, originBeeKeeperID, originBeeKeeperName, originBeeKeeperInformation, originBeeKeeperLatitude, originBeeKeeperLongitude, quantity, productNotes)
+        })
 
-        // Mark an item as Sold by calling function buyItem()
+        it("Testing smart contract function deliverHoney() that allows a shipper to deliver honey", async() => {
 
-
-        // Retrieve the just now saved item from blockchain by calling function fetchItem()
-
-
-        // Verify the result set
-
+        })
     })
 
-    // 6th Test
-    it("Testing smart contract function shipItem() that allows a harvester to ship honey", async() => {
-        const supplyChain = await SupplyChain.deployed()
+    context('release payment', () => {
+        var supplyChain
 
-        // Declare and Initialize a variable for event
+        before(async () => {
+            supplyChain = await SupplyChain.deployed()
 
+            // Watch the emitted event Harvested()
+            var event = supplyChain.Harvested({fromBlock: 0})
 
-        // Watch the emitted event Shipped()
+            await event.watch((err, res) => {
+                eventEmitted = true
+            })
 
+            await supplyChain.harvestItem(upc, harvesterID, originBeeKeeperID, originBeeKeeperName, originBeeKeeperInformation, originBeeKeeperLatitude, originBeeKeeperLongitude, quantity, productNotes)
+        })
 
-        // Mark an item as Sold by calling function buyItem()
+        it("Testing smart contract function releasePayment() that allows a buyer to release payment", async() => {
 
-
-        // Retrieve the just now saved item from blockchain by calling function fetchItem()
-
-
-        // Verify the result set
-
-    })
-
-    // 7th Test
-    it("Testing smart contract function receiveItem() that allows a shipper to mark honey received", async() => {
-        const supplyChain = await SupplyChain.deployed()
-
-        // Declare and Initialize a variable for event
-
-
-        // Watch the emitted event Received()
-
-
-        // Mark an item as Sold by calling function buyItem()
-
-
-        // Retrieve the just now saved item from blockchain by calling function fetchItem()
-
-
-        // Verify the result set
-
-    })
-
-    // 8th Test
-    it("Testing smart contract function purchaseItem() that allows a buyer to purchase honey", async() => {
-        const supplyChain = await SupplyChain.deployed()
-
-        // Declare and Initialize a variable for event
-
-
-        // Watch the emitted event Purchased()
-
-
-        // Mark an item as Sold by calling function buyItem()
-
-
-        // Retrieve the just now saved item from blockchain by calling function fetchItem()
-
-
-        // Verify the result set
-
-    })
-
-    // 9th Test
-    it("Testing smart contract function fetchItemBufferOne() that allows anyone to fetch item details from blockchain", async() => {
-        const supplyChain = await SupplyChain.deployed()
-
-        // Retrieve the just now saved item from blockchain by calling function fetchItem()
-
-
-        // Verify the result set:
-
-    })
-
-    // 10th Test
-    it("Testing smart contract function fetchItemBufferTwo() that allows anyone to fetch item details from blockchain", async() => {
-        const supplyChain = await SupplyChain.deployed()
-
-        // Retrieve the just now saved item from blockchain by calling function fetchItem()
-
-
-        // Verify the result set:
-
+        })
     })
 
 });
