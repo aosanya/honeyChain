@@ -1,9 +1,9 @@
 // migrating the appropriate contracts
-var BeeKeeperRole = artifacts.require("./BeeKeeperRole.sol");
-var HarvesterRole = artifacts.require("./HarvesterRole.sol");
-var ShipperRole = artifacts.require("./ShipperRole.sol");
-var BuyerRole = artifacts.require("./BuyerRole.sol");
-var SupplyChain = artifacts.require("./SupplyChain.sol");
+var BeeKeeperRole = artifacts.require("./BeeKeeperRole");
+var HarvesterRole = artifacts.require("./HarvesterRole");
+var ShipperRole = artifacts.require("./ShipperRole");
+var BuyerRole = artifacts.require("./BuyerRole");
+var SupplyChain = artifacts.require("./SupplyChain");
 
 module.exports = function(deployer) {
   deployer.deploy(BeeKeeperRole);
