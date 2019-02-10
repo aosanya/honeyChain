@@ -11,6 +11,7 @@ App = {
     originFarmInformation: null,
     originFarmLatitude: null,
     originFarmLongitude: null,
+    harvestQuantity: 0,
     productNotes: null,
     productPrice: 0,
     harvesterID: "0x0000000000000000000000000000000000000000",
@@ -32,6 +33,7 @@ App = {
         App.originFarmInformation = $("#originFarmInformation").val();
         App.originFarmLatitude = $("#originFarmLatitude").val();
         App.originFarmLongitude = $("#originFarmLongitude").val();
+        App.harvestQuantity = $("#harvestQuantity").val();
         App.productNotes = $("#productNotes").val();
         App.productPrice = $("#productPrice").val();
         App.harvesterID = $("#harvesterID").val();
@@ -47,6 +49,7 @@ App = {
             App.originFarmInformation,
             App.originFarmLatitude,
             App.originFarmLongitude,
+            App.harvestQuantity,
             App.productNotes,
             App.productPrice,
             App.harvesterID,
@@ -108,8 +111,6 @@ App = {
             var SupplyChainArtifact = data;
             App.contracts.SupplyChain = TruffleContract(SupplyChainArtifact);
             App.contracts.SupplyChain.setProvider(App.web3Provider);
-            App.contracts.SupplyChain.new()
-            //App.contracts.SupplyChain.at("0x23e2b13b08a22e9eee431f862ec7a17ab1e99b98")
             App.fetchHarvest();
             App.fetchItemBufferTwo();
             App.fetchEvents();
@@ -169,7 +170,11 @@ App = {
         event.preventDefault();
         var processId = parseInt($(event.target).data('id'));
 
+
+
         App.contracts.SupplyChain.at("0x23E2b13b08a22E9eEe431F862eC7A17aB1E99B98").then(function(instance) {
+            //return instance.harvestItem(2, App.metamaskAccountID, "12", "12", 1, 2, 10, "1")
+            console.log(App)
             return instance.harvestItem(
                 App.upc,
                 App.metamaskAccountID,
@@ -177,6 +182,7 @@ App = {
                 App.originFarmInformation,
                 App.originFarmLatitude,
                 App.originFarmLongitude,
+                App.harvestQuantity,
                 App.productNotes
             );
         }).then(function(result) {
