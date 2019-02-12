@@ -17,6 +17,7 @@ App = {
     harvesterID: "0x0000000000000000000000000000000000000000",
     shipperID: "0x0000000000000000000000000000000000000000",
     buyerID: "0x0000000000000000000000000000000000000000",
+    state: "",
 
     init: async function () {
         App.readForm();
@@ -111,11 +112,13 @@ App = {
             var SupplyChainArtifact = data;
             App.contracts.SupplyChain = TruffleContract(SupplyChainArtifact);
             App.contracts.SupplyChain.setProvider(App.web3Provider);
-            App.fetchHarvest();
-            App.fetchItemBufferTwo();
+            //App.fetchHarvest();
+            //App.fetchItemBufferTwo();
             App.fetchEvents();
 
         });
+
+        App.showForm("productOverview")
 
         return App.bindEvents();
     },
@@ -162,6 +165,30 @@ App = {
                 break;
             case 10:
                 return await App.fetchItemBufferTwo(event);
+                break;
+            case 100:
+                return await App.showForm("productOverview");
+                break;
+            case 101:
+                return await App.showForm("harvest");
+                break;
+            case 102:
+                return await App.showForm("placeOrder");
+                break;
+            case 103:
+                return await App.showForm("sendQuote");
+                break;
+            case 104:
+                return await App.showForm("purchase");
+                break;
+            case 105:
+                return await App.showForm("ship");
+                break;
+            case 106:
+                return await App.showForm("deliver");
+                break;
+            case 107:
+                return await App.showForm("transactionHistory");
                 break;
             }
     },
@@ -294,6 +321,60 @@ App = {
         });
     },
 
+    showForm: function(state) {
+        if (App.state == state){
+            return
+        }
+
+        App.showContainer("productOverview", false);
+        App.showContainer("harvestForm", false);
+        App.showContainer("placeOrderForm", false);
+        App.showContainer("sendQuoteForm", false);
+        App.showContainer("purchaseForm", false);
+        App.showContainer("shipForm", false);
+        App.showContainer("deliverForm", false);
+        App.showContainer("transactionHistory", false);
+
+        switch(state) {
+            case "productOverview":
+                App.showContainer("productOverview", true);
+                break;
+            case "harvest":
+                App.showContainer("harvestForm", true);
+                break;
+            case "placeOrder":
+                App.showContainer("placeOrderForm", true);
+                break;
+            case "sendQuote":
+                App.showContainer("sendQuoteForm", true);
+                break;
+            case "purchase":
+                App.showContainer("purchaseForm", true);
+                break;
+            case "ship":
+                App.showContainer("shipForm", true);
+                break;
+            case "deliver":
+                App.showContainer("deliverForm", true);
+                break;
+            case "transactionHistory":
+                App.showContainer("transactionHistory", true);
+                break;
+
+            default:
+
+        }
+    },
+
+    showContainer: function(name, visible) {
+        if(!visible){
+            $("#" + name).addClass("Hidden")
+        }
+        else{
+            $("#" + name).removeClass("Hidden")
+        }
+    },
+
     fetchHarvest: function () {
     ///   event.preventDefault();
     ///    var processId = parseInt($(event.target).data('id'));
@@ -303,11 +384,27 @@ App = {
         App.contracts.SupplyChain.at("0x23E2b13b08a22E9eEe431F862eC7A17aB1E99B98").then(function(instance) {
           return instance.fetchHarvest(App.upc);
         }).then(function(result) {
-          $("#ftc-item").text(result);
-          console.log('fetchHarvest', result);
+          App.showHarvest(result);
         }).catch(function(err) {
           console.log(err.message);
         });
+    },
+
+    showHarvest : function(harvest) {
+        $("#summary").append(App.formatSummary("SKU", harvest[0]));
+        $("#summary").append(App.formatSummary("UPC", harvest[1]));
+        $("#summary").append(App.formatSummary("Harvester", harvest[2]));
+        $("#summary").append(App.formatSummary("Owner Id", harvest[3]));
+        $("#summary").append(App.formatSummary("Bee Keeper Id", harvest[4]));
+        $("#summary").append(App.formatSummary("Bee Keeper Name", harvest[5]));
+        $("#summary").append(App.formatSummary("Bee Keeper Info", harvest[6]));
+        $("#summary").append(App.formatSummary("Farm Latitude", harvest[7]));
+        $("#summary").append(App.formatSummary("Farm Longitude", harvest[8]));
+        $("#summary").append(App.formatSummary("Quantity", harvest[9]));
+    },
+
+    formatSummary : function(name, value) {
+        return '<li>' + name + ' <div class="Info">' + value + '</div></li>'
     },
 
     fetchItemBufferTwo: function () {

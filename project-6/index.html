@@ -6,102 +6,229 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fair Trade Honey</title>
     <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
 </head>
 
 <body>
-    <div class="container">
-        <h1 style="text-align: center;">Fair Trade Honey</h1>
-        <hr>
-        <p style="text-align: center;">Prove the authenticity of honey using the Ethereum blockchain.</p>
-    </div>
 
-    <div id="ftc-harvest">
-        <h2>Product Overview</h2>
-        <div class="form-group">
-            SKU
-            <br>
-            <input class="input-field" type="number" id="sku" name="sku" value=1><br>
-            UPC
-            <br>
-            <input type="number" id="upc" name="upc" value=1><br>
-            Current Owner ID
-            <br>
-            <input type="text" id="ownerID" name="ownerID" value="0x27D8D15CbC94527cAdf5eC14B69519aE23288B95" size="50"><br>
-            <div class=button-div>
-                <button class="btn-fetchOne" id="button" type="button" data-id="9">Fetch Data 1</button>
-                <button class="btn-fetchTwo" id="button" type="button" data-id="10">Fetch Data 2</button>
+    <div class="container">
+        <span class="BrandName">Fair Trade Honey.</span>
+        <span class="SubScript">Prove the authenticity of honey using the Ethereum blockchain.</span>
+        <hr>
+    </div>
+    <div class="container">
+        <nav class='nav'>
+            <ul>
+                <li>
+                    <a data-id="100">
+                        Product Overview
+                    </a>
+                </li>
+                <li class="NavSeparator">
+                    |
+                </li>
+                <li>
+                    <a data-id="101">
+                        Harvest
+                    </a>
+                </li>
+                <li class="NavSeparator">
+                    |
+                </li>
+                <li>
+                    <a data-id="102">
+                        Place Order
+                    </a>
+                </li>
+                <li class="NavSeparator">
+                    |
+                </li>
+                <li>
+                    <a data-id="103">
+                        Send Quote
+                    </a>
+                </li>
+                <li class="NavSeparator">
+                    |
+                </li>
+                <li>
+                    <a data-id="104">
+                        Purchase
+                    </a>
+                </li>
+                <li class="NavSeparator">
+                    |
+                </li>
+                <li>
+                    <a data-id="105">
+                        Ship
+                    </a>
+                </li>
+                <li class="NavSeparator">
+                    |
+                </li>
+                <li>
+                    <a data-id="106">
+                        Deliver
+                    </a>
+                </li>
+                <li class="NavSeparator">
+                    |
+                </li>
+                <li>
+                    <a data-id="107">
+                        Transaction History
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+    <div class="container">
+        <div id="ftc-harvest">
+            <div class="form Hidden" name="productOverview" id="productOverview">
+                <h2>Product Overview</h2>
+                <div class="form-group">
+                    UPC
+                    <br>
+                    <input type="number" id="upc" name="upc" value=1><br>
+                    SKU
+                    <br>
+                    <input class="input-field" type="number" id="sku" name="sku" value=1><br>
+                    Current Owner ID
+                    <br>
+                    <input type="text" id="ownerID" name="ownerID" value="0x27D8D15CbC94527cAdf5eC14B69519aE23288B95" size="50"><br>
+                    <div class=button-div>
+                        <button class="btn-fetchOne" id="button" type="button" data-id="9">Fetch Product</button>
+                        <!-- <button class="btn-fetchTwo" id="button" type="button" data-id="10">Fetch Data 2</button> -->
+                    </div>
+                </div>
+                <div class=form-break></div>
+            </div>
+            <div class="form Hidden" name="harvestForm" id="harvestForm">
+                <h2>Harvest</h2>
+                <div class="form-group">
+                    UPC
+                    <br>
+                    <input type="number" id="upc" name="upc" value=1><br>
+                    BeeKeeper ID
+                    <br>
+                    <input type="text" id="originBeekeeperID" name="originBeekeeperID" value="0x018C2daBef4904ECbd7118350A0c54DbeaE3549A"
+                        size="50"><br>
+                    Farm Name
+                    <br>
+                    <input type="text" id="originBeekeeperName" name="originBeekeeperName" value="John Doe"><br>
+                    Farm Information
+                    <br>
+                    <input type="text" id="originFarmInformation" name="originFarmInformation" value="Yarra Valley"><br>
+                    Farm Latitude
+                    <br>
+                    <input type="text" id="originFarmLatitude" name="originFarmLatitude" value="-38.239770"><br>
+                    Farm Longitude
+                    <br>
+                    <input type="text" id="originFarmLongitude" name="originFarmLongitude" value="144.341490"><br>
+                    <br>
+                    Quantity
+                    <br>
+                    <input type="number" id="harvestQuantity" name="harvestQuantity" value=20>Liters<br>
+                    <button class="btn-harvest" id="button" type="button" data-id="1">Harvest</button>
+                </div>
+                <div class=form-break></div>
+            </div>
+            <div class="form Hidden" name="placeOrderForm" id="placeOrderForm">
+                <h2>Place Order</h2>
+                <div class="form-group">
+
+
+                    <button class="btn-placeOrder" id="button" type="button" data-id="1">Place Order</button>
+                </div>
+                <div class=form-break></div>
+            </div>
+            <div class="form Hidden" name="sendQuoteForm" id="sendQuoteForm">
+                <h2>Send Quote</h2>
+                <div class="form-group">
+
+
+                    <button class="btn-sendQuote" id="button" type="button" data-id="1">Send Quote</button>
+                </div>
+                <div class=form-break></div>
+            </div>
+            <div class="form Hidden" name="purchaseForm" id="purchaseForm">
+                <h2>Purchase</h2>
+                <div class="form-group">
+
+
+                    <button class="btn-purchase" id="button" type="button" data-id="1">Purchase</button>
+                </div>
+                <div class=form-break></div>
+            </div>
+            <div class="form Hidden" name="shipForm" id="shipForm">
+                <h2>Ship</h2>
+                <div class="form-group">
+
+
+                    <button class="btn-ship" id="button" type="button" data-id="1">Ship</button>
+                </div>
+                <div class=form-break></div>
+            </div>
+            <div class="form Hidden" name="deliverForm" id="deliverForm">
+                <h2>Deliver</h2>
+                <div class="form-group">
+
+                    <button class="btn-deliver" id="button" type="button" data-id="1">Deliver</button>
+                </div>
+                <div class=form-break></div>
+            </div>
+            <div class="container Hidden">
+                <h2>Product Details</h2>
+                <div class="form-group">
+                    Product Notes
+                    <br>
+                    <input type="text" id="productNotes" name="productNotes" value="Best beans for Espresso" size="60"><br>
+                    Product Price
+                    <br>
+                    <input type="number" id="productPrice" name="productPrice" value=1>ETH<br>
+                    Harvester ID
+                    <br>
+                    <input type="text" id="harvesterID" name="harvesterID" value="0xCe5144391B4aB80668965F2Cc4f2CC102380Ef0A"
+                        size="50">
+                    <br>
+                    Shipper ID
+                    <br>
+                    <input type="text" id="shipperID" name="shipperID" value="0x460c31107DD048e34971E57DA2F99f659Add4f02"
+                        size="50"><br>
+                    Harvester ID
+                    <br>
+                    <input type="text" id="buyerID" name="buyerID" value="0xD37b7B8C62BE2fdDe8dAa9816483AeBDBd356088"
+                        size="50"><br>
+                    <br>
+                    <button class="btn-buy" id="button" type="button" data-id="5">Buy</button>
+                    <button class="btn-ship" id="button" type="button" data-id="6">Ship</button>
+                    <button class="btn-receive" id="button" type="button" data-id="7">Receive</button>
+                    <button class="btn-purchase" id="button" type="button" data-id="8">Purchase</button>
+                </div>
+                <div class=form-break></div>
             </div>
         </div>
-        <div class=form-break></div>
-        <h2>Farm Details</h2>
-        <div class="form-group">
-            BeeKeeper ID
-            <br>
-            <input type="text" id="originBeekeeperID" name="originBeekeeperID" value="0x018C2daBef4904ECbd7118350A0c54DbeaE3549A"
-                size="50"><br>
-            Farm Name
-            <br>
-            <input type="text" id="originBeekeeperName" name="originBeekeeperName" value="John Doe"><br>
-            Farm Information
-            <br>
-            <input type="text" id="originFarmInformation" name="originFarmInformation" value="Yarra Valley"><br>
-            Farm Latitude
-            <br>
-            <input type="text" id="originFarmLatitude" name="originFarmLatitude" value="-38.239770"><br>
-            Farm Longitude
-            <br>
-            <input type="text" id="originFarmLongitude" name="originFarmLongitude" value="144.341490"><br>
-            <br>
-            Quantity
-            <br>
-            <input type="number" id="harvestQuantity" name="harvestQuantity" value=20>Liters<br>
-            <button class="btn-harvest" id="button" type="button" data-id="1">Harvest</button>
-            <button class="btn-process" id="button" type="button" data-id="2">Process</button>
-            <button class="btn-pack" id="button" type="button" data-id="3">Pack</button>
-            <button class="btn-forsale" id="button" type="button" data-id="4">ForSale</button>
+        <div class="form" id="productSummary" name="productSummary">
+            <h2>Product Summary</h2>
+            <div class="form-group">
+                <ul id="summary">
+                    <!-- Events will appear here from app.js -->
+                </ul>
+            </div>
         </div>
-        <div class=form-break></div>
-        <h2>Product Details</h2>
-        <div class="form-group">
-            Product Notes
-            <br>
-            <input type="text" id="productNotes" name="productNotes" value="Best beans for Espresso" size="60"><br>
-            Product Price
-            <br>
-            <input type="number" id="productPrice" name="productPrice" value=1>ETH<br>
-            Harvester ID
-            <br>
-            <input type="text" id="harvesterID" name="harvesterID" value="0xCe5144391B4aB80668965F2Cc4f2CC102380Ef0A"
-                size="50">
-            <br>
-            Shipper ID
-            <br>
-            <input type="text" id="shipperID" name="shipperID" value="0x460c31107DD048e34971E57DA2F99f659Add4f02"
-                size="50"><br>
-            Harvester ID
-            <br>
-            <input type="text" id="buyerID" name="buyerID" value="0xD37b7B8C62BE2fdDe8dAa9816483AeBDBd356088"
-                size="50"><br>
-            <br>
-            <button class="btn-buy" id="button" type="button" data-id="5">Buy</button>
-            <button class="btn-ship" id="button" type="button" data-id="6">Ship</button>
-            <button class="btn-receive" id="button" type="button" data-id="7">Receive</button>
-            <button class="btn-purchase" id="button" type="button" data-id="8">Purchase</button>
-        </div>
-        <div class=form-break></div>
-        <hr>
     </div>
 
-    <h2>Transaction History<span id="ftc-history"></span></h2>
-    <div>
-        <ul id="ftc-events">
-            <!-- Events will appear here from app.js -->
-        </ul>
-        <br>
-        <hr>
+    <div class="form Hidden" id="transactionHistory" name="transactionHistory">
+        <h2>Transaction History<span id="ftc-history"></span></h2>
+        <div>
+            <ul id="ftc-events">
+                <!-- Events will appear here from app.js -->
+            </ul>
+            <br>
+            <hr>
+        </div>
     </div>
-
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <!-- <script src="js/web3.min.js"></script> -->
     <script src="js/truffle-contract.js"></script>
