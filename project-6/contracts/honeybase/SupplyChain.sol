@@ -6,7 +6,7 @@ contract SupplyChain {
     address owner;
 
     // Define a variable called 'upc' for Universal Product Code (UPC)
-    uint  upc;
+    // uint  upc;
 
     // Define a variable called 'sku' for Stock Keeping Unit (SKU)
     uint  sku;
@@ -186,7 +186,6 @@ contract SupplyChain {
     constructor() public payable {
         owner = msg.sender;
         sku = 1;
-        upc = 1;
         orderId = 1;
         quoteId = 1;
         purchaseId = 1;
@@ -206,7 +205,7 @@ contract SupplyChain {
         // Add the new harvest as part of Harvest
         Harvest storage harvest_ = harvests[_upc];
         harvest_.sku = sku;
-        harvest_.upc = upc;
+        harvest_.upc = _upc;
         harvest_.ownerID = owner;
         harvest_.originBeekeeperID = _originBeekeeperID;
         harvest_.originBeekeeperName = _originBeekeeperName;
@@ -219,12 +218,12 @@ contract SupplyChain {
         harvest_.harvesterId = msg.sender;
 
 
-        emit Harvested(upc);
+        emit Harvested(_upc);
         sku = sku + 1;
     }
 
     // Define a function 'processtItem' that allows a farmer to mark an harvest 'Processed'
-    function placeOrder(address buyerId, uint _upc, uint quantity) public
+    function placeOrder(uint _upc, uint quantity) public
     // Call modifier to check if upc has passed previous supply chain stage
 
     // Call modifier to verify caller of this function
@@ -232,8 +231,8 @@ contract SupplyChain {
     {
         Order storage order_ = orders[orderId];
         order_.orderId = orderId;
-        order_.buyerId = buyerId;
-        order_.upc = upc;
+        order_.buyerId = msg.sender;
+        order_.upc = _upc;
         order_.quantity = quantity;
 
 

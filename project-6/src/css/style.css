@@ -38,6 +38,7 @@ button {
     cursor: pointer;
 }
 
+
 .sell {
   background-color: white;
   color: #D1C4E9;
@@ -143,6 +144,11 @@ li {
 }
 
 .Info {
-  background-color: #fff;
+  background-color:#fdfdfd;
   width: 80%;
+  padding: 12px 20px;
+  margin: 10px 0;
+  border-color: #f1f1f1;
+  border-style: solid;
+  border-width: 1px;
 }

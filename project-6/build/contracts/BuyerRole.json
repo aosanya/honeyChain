@@ -284,7 +284,7 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1714,
+                          "referencedDeclaration": 1707,
                           "src": "608:3:3",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -392,7 +392,7 @@
                               "name": "msg",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 1714,
+                              "referencedDeclaration": 1707,
                               "src": "762:3:3",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_magic_message",
@@ -480,10 +480,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        1717,
-                        1718
+                        1710,
+                        1711
                       ],
-                      "referencedDeclaration": 1718,
+                      "referencedDeclaration": 1711,
                       "src": "746:7:3",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
@@ -842,7 +842,7 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1714,
+                          "referencedDeclaration": 1707,
                           "src": "1245:3:3",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -1512,7 +1512,7 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1714,
+                          "referencedDeclaration": 1707,
                           "src": "608:3:3",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -1620,7 +1620,7 @@
                               "name": "msg",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 1714,
+                              "referencedDeclaration": 1707,
                               "src": "762:3:3",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_magic_message",
@@ -1708,10 +1708,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        1717,
-                        1718
+                        1710,
+                        1711
                       ],
-                      "referencedDeclaration": 1718,
+                      "referencedDeclaration": 1711,
                       "src": "746:7:3",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
@@ -2070,7 +2070,7 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1714,
+                          "referencedDeclaration": 1707,
                           "src": "1245:3:3",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -2549,5 +2549,5 @@
     }
   },
   "schemaVersion": "2.0.1",
-  "updatedAt": "2019-02-12T05:08:07.111Z"
+  "updatedAt": "2019-02-15T05:28:23.121Z"
 }

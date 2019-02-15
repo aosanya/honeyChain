@@ -1,18 +1,24 @@
 App = {
+    contract: "0x23e2b13b08a22e9eee431f862ec7a17ab1e99b98",
     web3Provider: null,
     contracts: {},
     emptyAddress: "0x0000000000000000000000000000000000000000",
-    sku: 0,
-    upc: 0,
     metamaskAccountID: "0x0000000000000000000000000000000000000000",
     ownerID: "0x0000000000000000000000000000000000000000",
-    originBeekeeperID: "0x0000000000000000000000000000000000000000",
-    originBeekeeperName: null,
-    originFarmInformation: null,
-    originFarmLatitude: null,
-    originFarmLongitude: null,
-    harvestQuantity: 0,
-    productNotes: null,
+    upc: 0,
+    harvest: {
+        sku: 0,
+        originBeekeeperID: "0x0000000000000000000000000000000000000000",
+        originBeekeeperName: null,
+        originFarmInformation: null,
+        originFarmLatitude: null,
+        originFarmLongitude: null,
+        harvestQuantity: 0,
+        productNotes: null,
+    },
+    order :{
+        quantity: 0,
+    },
     productPrice: 0,
     harvesterID: "0x0000000000000000000000000000000000000000",
     shipperID: "0x0000000000000000000000000000000000000000",
@@ -26,37 +32,59 @@ App = {
     },
 
     readForm: function () {
-        App.sku = $("#sku").val();
+        App.harvest.sku = $("#sku").val();
         App.upc = $("#upc").val();
         App.ownerID = $("#ownerID").val();
-        App.originBeekeeperID = $("#originBeekeeperID").val();
-        App.originBeekeeperName = $("#originBeekeeperName").val();
-        App.originFarmInformation = $("#originFarmInformation").val();
-        App.originFarmLatitude = $("#originFarmLatitude").val();
-        App.originFarmLongitude = $("#originFarmLongitude").val();
-        App.harvestQuantity = $("#harvestQuantity").val();
-        App.productNotes = $("#productNotes").val();
+        App.harvest.originBeekeeperID = $("#originBeekeeperID").val();
+        App.harvest.originBeekeeperName = $("#originBeekeeperName").val();
+        App.harvest.originFarmInformation = $("#originFarmInformation").val();
+        App.harvest.originFarmLatitude = $("#originFarmLatitude").val();
+        App.harvest.originFarmLongitude = $("#originFarmLongitude").val();
+        App.harvest.harvestQuantity = $("#harvestQuantity").val();
+        App.harvest.productNotes = $("#productNotes").val();
         App.productPrice = $("#productPrice").val();
         App.harvesterID = $("#harvesterID").val();
         App.shipperID = $("#shipperID").val();
         App.buyerID = $("#buyerID").val();
 
+        //PlaceOrder
+        App.harvestQuantity = $("#harvestQuantity").val();
+        App.productNotes = $("#productNotes").val();
+
         console.log(
-            App.sku,
+            App.harvest.sku,
             App.upc,
             App.ownerID,
-            App.originBeekeeperID,
-            App.originBeekeeperName,
-            App.originFarmInformation,
-            App.originFarmLatitude,
-            App.originFarmLongitude,
-            App.harvestQuantity,
-            App.productNotes,
+            App.harvest.originBeekeeperID,
+            App.harvest.originBeekeeperName,
+            App.harvest.originFarmInformation,
+            App.harvest.originFarmLatitude,
+            App.harvest.originFarmLongitude,
+            App.harvest.harvestQuantity,
+            App.harvest.productNotes,
             App.productPrice,
             App.harvesterID,
             App.shipperID,
             App.buyerID
         );
+    },
+
+    readHarvestForm: function () {
+        App.harvest.sku = 0;
+        App.upc = $("#harvestUpc").val();
+        App.ownerID = $("#ownerID").val();
+        App.harvest.originBeekeeperID = $("#originBeekeeperID").val();
+        App.harvest.originBeekeeperName = $("#originBeekeeperName").val();
+        App.harvest.originFarmInformation = $("#originFarmInformation").val();
+        App.harvest.originFarmLatitude = $("#originFarmLatitude").val();
+        App.harvest.originFarmLongitude = $("#originFarmLongitude").val();
+        App.harvest.harvestQuantity = $("#harvestQuantity").val();
+        App.harvest.productNotes = $("#productNotes").val();
+    },
+
+    readOrderForm: function () {
+        App.upc = $("#orderUpc").val();
+        App.order.quantity = $("#orderQuantity").val();
     },
 
     initWeb3: async function () {
@@ -118,7 +146,7 @@ App = {
 
         });
 
-        App.showForm("productOverview")
+        //Tabs.showForm("productOverview")
 
         return App.bindEvents();
     },
@@ -132,113 +160,82 @@ App = {
 
         App.getMetaskAccountID();
 
-        var processId = parseInt($(event.target).data('id'));
+        var processId = $(event.target).data('id');
         console.log('processId',processId);
 
         switch(processId) {
-            case 1:
-                return await App.harvestItem(event);
-                break;
-            case 2:
-                return await App.processItem(event);
-                break;
+            case "harvest":
+                App.readHarvestForm();
+                const resultHarvestTx = await SupplyChainWrite.harvestItem(event);
+                Display.showTx(resultHarvestTx);
+                return;
+            case "placeOrder":
+                App.readOrderForm();
+                const resultOrderTx = await SupplyChainWrite.placeOrder(event);
+                Display.showTx(resultOrderTx);
+                return;
             case 3:
-                return await App.packItem(event);
+                return await App.sendQuote(event);
                 break;
             case 4:
-                return await App.sellItem(event);
-                break;
-            case 5:
-                return await App.buyItem(event);
-                break;
-            case 6:
-                return await App.shipItem(event);
-                break;
-            case 7:
-                return await App.receiveItem(event);
-                break;
-            case 8:
                 return await App.purchaseItem(event);
                 break;
-            case 9:
-                return await App.fetchHarvest(event);
+            case 5:
+                return await App.shipItem(event);
+                break;
+            case 6:
+                return await App.deliverItem(event);
+                break;
+            case "fetchHarvest":
+
+                const result = await SupplyChainRead.fetchHarvest(event);
+                Tabs.showContainer("productSummary", true)
+                Display.showHarvest(result);
+                return;
                 break;
             case 10:
                 return await App.fetchItemBufferTwo(event);
                 break;
-            case 100:
-                return await App.showForm("productOverview");
+            case "retrieveProduct":
+                return await Tabs.showForm("productOverview");
                 break;
-            case 101:
-                return await App.showForm("harvest");
+            case "harvestForm":
+                return await Tabs.showForm("harvest");
                 break;
-            case 102:
-                return await App.showForm("placeOrder");
+            case "loadPlaceOrderForm":
+                return await Tabs.showForm("placeOrder");
                 break;
             case 103:
-                return await App.showForm("sendQuote");
+                return await Tabs.showForm("sendQuote");
                 break;
             case 104:
-                return await App.showForm("purchase");
+                return await Tabs.showForm("purchase");
                 break;
             case 105:
-                return await App.showForm("ship");
+                return await Tabs.showForm("ship");
                 break;
             case 106:
-                return await App.showForm("deliver");
+                return await Tabs.showForm("deliver");
                 break;
             case 107:
-                return await App.showForm("transactionHistory");
+                return await Tabs.showForm("transactionHistory");
                 break;
+            case "backHome":
+                return await Tabs.showForm("home", true);
+                break;
+
             }
     },
 
-    harvestItem: function(event) {
-        event.preventDefault();
-        var processId = parseInt($(event.target).data('id'));
 
 
 
-        App.contracts.SupplyChain.at("0x23E2b13b08a22E9eEe431F862eC7A17aB1E99B98").then(function(instance) {
-            //return instance.harvestItem(2, App.metamaskAccountID, "12", "12", 1, 2, 10, "1")
-            console.log(App)
-            return instance.harvestItem(
-                App.upc,
-                App.metamaskAccountID,
-                App.originBeekeeperName,
-                App.originFarmInformation,
-                App.originFarmLatitude,
-                App.originFarmLongitude,
-                App.harvestQuantity,
-                App.productNotes
-            );
-        }).then(function(result) {
-            $("#ftc-item").text(result);
-            console.log('harvestItem',result);
-        }).catch(function(err) {
-            console.log(err.message);
-        });
-    },
-
-    processItem: function (event) {
-        event.preventDefault();
-        var processId = parseInt($(event.target).data('id'));
-
-        App.contracts.SupplyChain.at("0x23E2b13b08a22E9eEe431F862eC7A17aB1E99B98").then(function(instance) {
-            return instance.processItem(App.upc, {from: App.metamaskAccountID});
-        }).then(function(result) {
-            $("#ftc-item").text(result);
-            console.log('processItem',result);
-        }).catch(function(err) {
-            console.log(err.message);
-        });
-    },
 
     packItem: function (event) {
         event.preventDefault();
         var processId = parseInt($(event.target).data('id'));
 
-        App.contracts.SupplyChain.at("0x23E2b13b08a22E9eEe431F862eC7A17aB1E99B98").then(function(instance) {
+        App.contracts.SupplyChain.at(App.contract).then(function(instance) {
             return instance.packItem(App.upc, {from: App.metamaskAccountID});
         }).then(function(result) {
             $("#ftc-item").text(result);
@@ -252,7 +249,7 @@ App = {
         event.preventDefault();
         var processId = parseInt($(event.target).data('id'));
 
-        App.contracts.SupplyChain.at("0x23E2b13b08a22E9eEe431F862eC7A17aB1E99B98").then(function(instance) {
+        App.contracts.SupplyChain.at(App.contract).then(function(instance) {
             const productPrice = web3.toWei(1, "ether");
             console.log('productPrice',productPrice);
             return instance.sellItem(App.upc, App.productPrice, {from: App.metamaskAccountID});
@@ -268,7 +265,7 @@ App = {
         event.preventDefault();
         var processId = parseInt($(event.target).data('id'));
 
-        App.contracts.SupplyChain.at("0x23E2b13b08a22E9eEe431F862eC7A17aB1E99B98").then(function(instance) {
+        App.contracts.SupplyChain.at(App.contract).then(function(instance) {
             const walletValue = web3.toWei(3, "ether");
             return instance.buyItem(App.upc, {from: App.metamaskAccountID, value: walletValue});
         }).then(function(result) {
@@ -283,7 +280,7 @@ App = {
         event.preventDefault();
         var processId = parseInt($(event.target).data('id'));
 
-        App.contracts.SupplyChain.at("0x23E2b13b08a22E9eEe431F862eC7A17aB1E99B98").then(function(instance) {
+        App.contracts.SupplyChain.at(App.contract).then(function(instance) {
             return instance.shipItem(App.upc, {from: App.metamaskAccountID});
         }).then(function(result) {
             $("#ftc-item").text(result);
@@ -297,7 +294,7 @@ App = {
         event.preventDefault();
         var processId = parseInt($(event.target).data('id'));
 
-        App.contracts.SupplyChain.at("0x23E2b13b08a22E9eEe431F862eC7A17aB1E99B98").then(function(instance) {
+        App.contracts.SupplyChain.at(App.contract).then(function(instance) {
             return instance.receiveItem(App.upc, {from: App.metamaskAccountID});
         }).then(function(result) {
             $("#ftc-item").text(result);
@@ -311,7 +308,7 @@ App = {
         event.preventDefault();
         var processId = parseInt($(event.target).data('id'));
 
-        App.contracts.SupplyChain.at("0x23E2b13b08a22E9eEe431F862eC7A17aB1E99B98").then(function(instance) {
+        App.contracts.SupplyChain.at(App.contract).then(function(instance) {
             return instance.purchaseItem(App.upc, {from: App.metamaskAccountID});
         }).then(function(result) {
             $("#ftc-item").text(result);
@@ -321,97 +318,19 @@ App = {
         });
     },
 
-    showForm: function(state) {
-        if (App.state == state){
-            return
-        }
 
-        App.showContainer("productOverview", false);
-        App.showContainer("harvestForm", false);
-        App.showContainer("placeOrderForm", false);
-        App.showContainer("sendQuoteForm", false);
-        App.showContainer("purchaseForm", false);
-        App.showContainer("shipForm", false);
-        App.showContainer("deliverForm", false);
-        App.showContainer("transactionHistory", false);
 
-        switch(state) {
-            case "productOverview":
-                App.showContainer("productOverview", true);
-                break;
-            case "harvest":
-                App.showContainer("harvestForm", true);
-                break;
-            case "placeOrder":
-                App.showContainer("placeOrderForm", true);
-                break;
-            case "sendQuote":
-                App.showContainer("sendQuoteForm", true);
-                break;
-            case "purchase":
-                App.showContainer("purchaseForm", true);
-                break;
-            case "ship":
-                App.showContainer("shipForm", true);
-                break;
-            case "deliver":
-                App.showContainer("deliverForm", true);
-                break;
-            case "transactionHistory":
-                App.showContainer("transactionHistory", true);
-                break;
+    addMessage: function(id) {
 
-            default:
-
-        }
     },
 
-    showContainer: function(name, visible) {
-        if(!visible){
-            $("#" + name).addClass("Hidden")
-        }
-        else{
-            $("#" + name).removeClass("Hidden")
-        }
-    },
 
-    fetchHarvest: function () {
-    ///   event.preventDefault();
-    ///    var processId = parseInt($(event.target).data('id'));
-        App.upc = $('#upc').val();
-        console.log('upc',App.upc);
-
-        App.contracts.SupplyChain.at("0x23E2b13b08a22E9eEe431F862eC7A17aB1E99B98").then(function(instance) {
-          return instance.fetchHarvest(App.upc);
-        }).then(function(result) {
-          App.showHarvest(result);
-        }).catch(function(err) {
-          console.log(err.message);
-        });
-    },
-
-    showHarvest : function(harvest) {
-        $("#summary").append(App.formatSummary("SKU", harvest[0]));
-        $("#summary").append(App.formatSummary("UPC", harvest[1]));
-        $("#summary").append(App.formatSummary("Harvester", harvest[2]));
-        $("#summary").append(App.formatSummary("Owner Id", harvest[3]));
-        $("#summary").append(App.formatSummary("Bee Keeper Id", harvest[4]));
-        $("#summary").append(App.formatSummary("Bee Keeper Name", harvest[5]));
-        $("#summary").append(App.formatSummary("Bee Keeper Info", harvest[6]));
-        $("#summary").append(App.formatSummary("Farm Latitude", harvest[7]));
-        $("#summary").append(App.formatSummary("Farm Longitude", harvest[8]));
-        $("#summary").append(App.formatSummary("Quantity", harvest[9]));
-    },
-
-    formatSummary : function(name, value) {
-        return '<li>' + name + ' <div class="Info">' + value + '</div></li>'
-    },
 
     fetchItemBufferTwo: function () {
     ///    event.preventDefault();
     ///    var processId = parseInt($(event.target).data('id'));
 
-        App.contracts.SupplyChain.at("0x23E2b13b08a22E9eEe431F862eC7A17aB1E99B98").then(function(instance) {
+        App.contracts.SupplyChain.at(App.contract).then(function(instance) {
           return instance.fetchItemBufferTwo.call(App.upc);
         }).then(function(result) {
           $("#ftc-item").text(result);
@@ -431,7 +350,7 @@ App = {
             };
         }
 
-        App.contracts.SupplyChain.at("0x23E2b13b08a22E9eEe431F862eC7A17aB1E99B98").then(function(instance) {
+        App.contracts.SupplyChain.at(App.contract).then(function(instance) {
         var events = instance.allEvents(function(err, log){
           if (!err)
             $("#ftc-events").append('<li>' + log.event + ' - ' + log.transactionHash + '</li>');
