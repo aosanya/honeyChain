@@ -184,7 +184,7 @@ contract('SupplyChain', function(accounts) {
         })
 
         it("Testing smart contract function sendQuote() that allows a harvester to sendQuote", async() => {
-            await supplyChain.sendQuote(1, price_1, shippingCost_1, downPayment_1)
+            await supplyChain.sendQuote(1, price_1, shippingCost_1, downPayment_1, {from : harvesterId_1})
 
             const resultOrder1 = await supplyChain.fetchQuote(1)
             assert.equal(resultOrder1[0], quoteId_1, 'Error: Invalid QuoteId')

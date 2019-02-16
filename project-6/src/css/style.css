@@ -143,6 +143,11 @@ li {
   padding-bottom: 5px;
 }
 
+.btn-Info{
+  padding: 10px;
+  margin: 0;
+}
+
 .Info {
   background-color:#fdfdfd;
   width: 80%;

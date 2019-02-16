@@ -19,6 +19,23 @@ App = {
     order :{
         quantity: 0,
     },
+    quote :{
+        orderId : 0,
+        price: 0,
+        shippingCost : 0,
+        downpayment : 0,
+    },
+    purchase :{
+        quoteId : 0
+    },
+    ship :{
+        purchaseId : 0
+    },
+    deliver :{
+        shippingId : 0
+    },
+
+
     productPrice: 0,
     harvesterID: "0x0000000000000000000000000000000000000000",
     shipperID: "0x0000000000000000000000000000000000000000",
@@ -87,6 +104,25 @@ App = {
         App.order.quantity = $("#orderQuantity").val();
     },
 
+    readQuoteForm: function () {
+        App.quote.orderId = $("#orderId").val();
+        App.quote.price = $("#orderPrice").val();
+        App.quote.shippingCost = $("#orderShippingCost").val();
+        App.quote.downpayment = $("#orderDownpayment").val();
+    },
+
+    readPurchaseForm: function () {
+        App.purchase.quoteId = $("#purchaseQuoteId").val();
+    },
+
+    readShipForm: function () {
+        App.ship.purchaseId = $("#shipPurchaseId").val();
+    },
+
+    readDeliverForm: function () {
+        App.deliver.shippingId = $("#deliverShippingId").val();
+    },
+
     initWeb3: async function () {
         // Find or Inject Web3 Provider
         /// Modern dapp browsers...
@@ -132,7 +168,8 @@ App = {
 
     initSupplyChain: function () {
         /// Source the truffle compiled smart contracts
-        var jsonSupplyChain='sc/build/contracts/SupplyChain.json';
+        var jsonSupplyChain='../build/contracts/SupplyChain.json';
+
 
         /// JSONfy the smart contracts
         $.getJSON(jsonSupplyChain, function(data) {
@@ -174,55 +211,66 @@ App = {
                 const resultOrderTx = await SupplyChainWrite.placeOrder(event);
                 Display.showTx(resultOrderTx);
                 return;
-            case 3:
-                return await App.sendQuote(event);
-                break;
-            case 4:
-                return await App.purchaseItem(event);
-                break;
-            case 5:
-                return await App.shipItem(event);
-                break;
-            case 6:
-                return await App.deliverItem(event);
-                break;
+            case "sendQuote":
+                App.readQuoteForm();
+                const resultQuoteTx = await SupplyChainWrite.sendQuote(event);
+                Display.showTx(resultQuoteTx);
+                return;
+            case "purchase":
+                App.readPurchaseForm();
+                const resultPurchaseTx = await SupplyChainWrite.purchase(event);
+                Display.showTx(resultPurchaseTx);
+                return;
+            case "ship":
+                App.readShipForm();
+                const resultShipTx = await SupplyChainWrite.ship(event);
+                Display.showTx(resultShipTx);
+                return;
+            case "deliver":
+                App.readDeliverForm();
+                const resultDeliverTx = await SupplyChainWrite.deliver(event);
+                Display.showTx(resultDeliverTx);
+                return;
             case "fetchHarvest":
-
                 const result = await SupplyChainRead.fetchHarvest(event);
                 Tabs.showContainer("productSummary", true)
                 Display.showHarvest(result);
                 return;
-                break;
+            case "orderShowHarvest":
+                const result = await SupplyChainRead.fetchHarvest(event);
+                Tabs.showContainer("productSummary", true)
+                Display.showHarvest(result);
+                return;
             case 10:
                 return await App.fetchItemBufferTwo(event);
                 break;
             case "retrieveProduct":
                 return await Tabs.showForm("productOverview");
-                break;
+
             case "harvestForm":
                 return await Tabs.showForm("harvest");
-                break;
+
             case "loadPlaceOrderForm":
                 return await Tabs.showForm("placeOrder");
-                break;
-            case 103:
+
+            case "loadSendQuoteForm":
                 return await Tabs.showForm("sendQuote");
-                break;
-            case 104:
+
+            case "loadPurchaseForm":
                 return await Tabs.showForm("purchase");
-                break;
-            case 105:
+
+            case "loadShipForm":
                 return await Tabs.showForm("ship");
-                break;
-            case 106:
+
+            case "loadDeliverForm":
                 return await Tabs.showForm("deliver");
-                break;
+
             case 107:
                 return await Tabs.showForm("transactionHistory");
-                break;
+
             case "backHome":
                 return await Tabs.showForm("home", true);
-                break;
+
 
             }
     },
