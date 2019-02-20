@@ -74,7 +74,7 @@ var Display = {
         $(targetName).append(Display.formatDetailSummary("Price", quote[2]));
         $(targetName).append(Display.formatDetailSummary("Shipping Cost", quote[3]));
         $(targetName).append(Display.formatDetailSummary("Downpayment", quote[4]));
-        $(targetName).append(Display.formatDetailSummary("Date Quoted", quote[5]));
+        $(targetName).append(Display.formatDetailSummary("Date Quoted", new Date(quote[5] * 1000).toUTCString()));
         $(targetName).append(Display.formatDetailSummary("Order Id", quote[1] + '<span class="btn-SubInfo glyphicon glyphicon-zoom-in" data-id="displayOrderDetails"></span>'));
         $(targetName).append(Display.addDetails("OrderDetails"));
     },
@@ -85,7 +85,7 @@ var Display = {
         $(targetName).empty();
         $(targetName).append("<div class='header'>Purchase Details</div>");
         // $(targetName).append(Display.formatDetailSummary("Purchase Id", purchase[0]));
-        $(targetName).append(Display.formatDetailSummary("Date Purchased", purchase[2]));
+        $(targetName).append(Display.formatDetailSummary("Date Purchased", new Date(purchase[2] * 1000).toUTCString()));
         $(targetName).append(Display.formatDetailSummary("Quote Id", purchase[1] + '<span class="btn-SubInfo glyphicon glyphicon-zoom-in" data-id="displayQuoteDetails"></span>'));
         $(targetName).append(Display.addDetails("QuoteDetails"));
     },
@@ -97,9 +97,9 @@ var Display = {
         $(targetName).append("<div class='header'>Shipping Details</div>");
         $(targetName).append(Display.formatDetailSummary("Shipment Id", shipping[0]));
         $(targetName).append(Display.formatDetailSummary("Shipper Id", shipping[1]));
-        $(targetName).append(Display.formatDetailSummary("Date Shipped", shipping[3]));
+        $(targetName).append(Display.formatDetailSummary("Date Shipped", new Date(shipping[3] * 1000).toUTCString()));
         $(targetName).append(Display.formatDetailSummary("Delivered", shipping[4]));
-        $(targetName).append(Display.formatDetailSummary("Date Delivered", shipping[5]));
+        $(targetName).append(Display.formatDetailSummary("Date Delivered", new Date(shipping[5] * 1000).toUTCString()));
         $(targetName).append(Display.formatDetailSummary("Purchase Id", shipping[2] + '<span class="btn-SubInfo glyphicon glyphicon-zoom-in" data-id="displayPurchaseDetails"></span>'));
         $(targetName).append(Display.addDetails("PurchaseDetails"));
 
@@ -116,9 +116,9 @@ var Display = {
         $(targetName).append(Display.formatDetailSummary("Shipment Id", delivery[0]));
         $(targetName).append(Display.formatDetailSummary("Shipper Id", delivery[1]));
         $(targetName).append(Display.formatDetailSummary("Purchase Id", delivery[2]));
-        $(targetName).append(Display.formatDetailSummary("Date Shipped", delivery[3]));
+        $(targetName).append(Display.formatDetailSummary("Date Shipped", new Date(delivery[3] * 1000).toUTCString()));
         $(targetName).append(Display.formatDetailSummary("Delivered", delivery[4]));
-        $(targetName).append(Display.formatDetailSummary("Date Delivered", delivery[5]));
+        $(targetName).append(Display.formatDetailSummary("Date Delivered", new Date( delivery[5] *1000).toUTCString()));
 
 
     },

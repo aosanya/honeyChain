@@ -21,22 +21,35 @@ contract SupplyChain {
 
     // Define a public mapping 'harvests' that maps the UPC to a Harvest.
     mapping (uint => Harvest) harvests;
+    mapping (uint => bool) harvestUPCs;
 
     // Define a public mapping 'orders' that maps the UPC to an Order.
     mapping (uint => Order) orders;
+    mapping (uint => bool) orderIds;
 
     // Define a public mapping 'quotes' that maps the orderId to a quote.
     mapping (uint => Quote) quotes;
+    mapping (uint => bool) quoteIds;
 
     // Define a public mapping 'purchases' that maps the purchaseId to a purchase.
     mapping (uint => Purchase) purchases;
+    mapping (uint => bool) purchaseIds;
 
      // Define a public mapping 'shipment' that maps the shipmentId to a shipment.
     mapping (uint => Shipment) shipments;
+    mapping (uint => bool) shipmentIds;
 
     // Define a public mapping 'harvestsHistory' that maps the UPC to an array of TxHash,
     // that track its journey through the supply chain -- to be sent from DApp.
     mapping (uint => string[]) harvestsHistory;
+
+    string private constant ERROR_HARVEST_DOES_NOT_EXIST = "ERROR_HARVEST_DOES_NOT_EXIST";
+    string private constant ERROR_ORDER_DOES_NOT_EXIST = "ERROR_ORDER_DOES_NOT_EXIST";
+    string private constant ERROR_QUOTE_DOES_NOT_EXIST = "ERROR_QUOTE_DOES_NOT_EXIST";
+    string private constant ERROR_PURCHASE_DOES_NOT_EXIST = "ERROR_PURCHASE_DOES_NOT_EXIST";
+    string private constant ERROR_SHIPMENT_DOES_NOT_EXIST = "ERROR_SHIPMENT_DOES_NOT_EXIST";
+    string private constant ERROR_ALREADY_DELIVERED = "ERROR_ALREADY_DELIVERED";
+
 
     // Define enum 'State' with the following values:
     enum State
@@ -49,8 +62,6 @@ contract SupplyChain {
         Delivered,         // 5
         ReleasedPayment         // 6
     }
-
-    State constant defaultState = State.Harvested;
 
     // Define a struct 'Item' with the following fields:
     struct Harvest {
@@ -67,7 +78,6 @@ contract SupplyChain {
         uint    productID;  // Product ID potentially a combination of upc + sku
         string  productNotes; // Product Notes
         uint    productPrice; // Product Price
-        State   harvestState;  // Product State as represented in the enum above
         address shipperID; // Metamask-Ethereum address of the Shipper
         address buyerID; // Metamask-Ethereum address of the Buyer
     }
@@ -124,60 +134,36 @@ contract SupplyChain {
         _;
     }
 
-    // Define a modifier that checks if the paid amount is sufficient to cover the price
-    modifier paidEnough(uint _price) {
-        require(msg.value >= _price);
+    modifier harvestExists(uint _upc) {
+        require(harvestUPCs[_upc] == true, ERROR_HARVEST_DOES_NOT_EXIST);
         _;
     }
 
+    modifier orderExists(uint _orderId) {
+        require(orderIds[_orderId] == true, ERROR_ORDER_DOES_NOT_EXIST);
+        _;
+    }
+
+    modifier quoteExists(uint _quoteId) {
+        require(quoteIds[_quoteId] == true, ERROR_QUOTE_DOES_NOT_EXIST);
+        _;
+    }
+
+    modifier purchaseExists(uint _purchaseId) {
+        require(purchaseIds[_purchaseId] == true, ERROR_PURCHASE_DOES_NOT_EXIST);
+        _;
+    }
+
+    modifier shipmentExists(uint _shippingId) {
+        require(shipmentIds[_shippingId] == true, ERROR_SHIPMENT_DOES_NOT_EXIST);
+        _;
+    }
     // Define a modifier that checks the price and refunds the remaining balance
     modifier checkValue(uint _upc) {
         _;
         uint _price = harvests[_upc].productPrice;
         uint amountToReturn = msg.value - _price;
         harvests[_upc].buyerID.transfer(amountToReturn);
-    }
-
-    // Define a modifier that checks if an harvest.state of a upc is Harvested
-    modifier harvested(uint _upc) {
-        require(harvests[_upc].harvestState == State.Harvested);
-        _;
-    }
-
-    // Define a modifier that checks if an harvest.state of a upc is PlacedOrder
-    modifier placedOrder(uint _upc) {
-        require(harvests[_upc].harvestState == State.PlacedOrder);
-        _;
-    }
-
-    // Define a modifier that checks if an harvest.state of a upc is SentQuote
-    modifier sentQuote(uint _upc) {
-        require(harvests[_upc].harvestState == State.SentQuote);
-        _;
-    }
-
-    // Define a modifier that checks if an harvest.state of a upc is Purchased
-    modifier commitedToPurchase(uint _upc) {
-        require(harvests[_upc].harvestState == State.Purchased);
-        _;
-    }
-
-    // Define a modifier that checks if an harvest.state of a upc is Shipped
-    modifier pickedUpHoney(uint _upc) {
-        require(harvests[_upc].harvestState == State.Shipped);
-        _;
-    }
-
-    // Define a modifier that checks if an harvest.state of a upc is Delivered
-    modifier deliveredHoney(uint _upc) {
-        require(harvests[_upc].harvestState == State.Delivered);
-        _;
-    }
-
-    // Define a modifier that checks if an harvest.state of a upc is ReleasedPayment
-    modifier releasedPayment(uint _upc) {
-        require(harvests[_upc].harvestState == State.ReleasedPayment);
-        _;
     }
 
     // In the constructor set 'owner' to the address that instantiated the contract
@@ -214,18 +200,14 @@ contract SupplyChain {
         harvest_.originFarmLongitude = _originFarmLongitude;
         harvest_.quantity = _quantity;
         harvest_.productNotes = _productNotes;
-        harvest_.harvestState = defaultState;
         harvest_.harvesterId = msg.sender;
-
-
+        harvestUPCs[_upc] = true;
         emit Harvested(_upc);
         sku = sku + 1;
     }
 
-    // Define a function 'processtItem' that allows a farmer to mark an harvest 'Processed'
     function placeOrder(uint _upc, uint quantity) public
-    // Call modifier to check if upc has passed previous supply chain stage
-
+    harvestExists(_upc)
     // Call modifier to verify caller of this function
 
     {
@@ -234,7 +216,7 @@ contract SupplyChain {
         order_.buyerId = msg.sender;
         order_.upc = _upc;
         order_.quantity = quantity;
-
+        orderIds[orderId] = true;
 
         emit PlacedOrder(orderId, quantity);
 
@@ -243,8 +225,7 @@ contract SupplyChain {
 
     // Define a function 'packItem' that allows a farmer to mark an harvest 'Packed'
     function sendQuote(uint _orderId, uint _price, uint _shippingCost,uint _downPayment) public
-    // Call modifier to check if upc has passed previous supply chain stage
-
+    orderExists(_orderId)
     // Call modifier to verify caller of this function
 
     {
@@ -255,7 +236,7 @@ contract SupplyChain {
         quote_.shippingCost = _shippingCost;
         quote_.downPayment = _downPayment;
         quote_.date = now;
-
+        quoteIds[quoteId] = true;
 
         emit SentQuote(quoteId);
         quoteId = quoteId + 1;
@@ -263,14 +244,14 @@ contract SupplyChain {
 
     // Define a function 'sellItem' that allows a farmer to mark an harvest 'ForSale'
     function purchase(uint _quoteId) public
-    // Call modifier to check if upc has passed previous supply chain stage
+    quoteExists(_quoteId)
     // Call modifier to verify caller of this function
     {
         Purchase storage purchase_ = purchases[purchaseId];
         purchase_.quoteId = _quoteId;
         purchase_.purchaseId = purchaseId;
         purchase_.date = now;
-
+        purchaseIds[purchaseId] = true;
         emit Purchased(purchaseId);
         purchaseId = purchaseId + 1;
     }
@@ -278,15 +259,15 @@ contract SupplyChain {
     // Define a function 'ship' that allows the harvester to mark an harvest 'Shipped'
     // Use the above modifers to check if the harvest is sold
     function ship(uint _purchaseId) public
-      // Call modifier to check if upc has passed previous supply chain stage
+      purchaseExists(_purchaseId)
       // Call modifier to verify caller of this function
-
     {
         Shipment storage shipment_ = shipments[shipmentId];
         shipment_.shipmentId = shipmentId;
         shipment_.shipper = msg.sender;
         shipment_.purchaseId = _purchaseId;
         shipment_.date = now;
+        shipmentIds[shipmentId] = true;
 
         emit Shipped(shipmentId);
         shipmentId = shipmentId + 1;
@@ -296,14 +277,18 @@ contract SupplyChain {
     // Define a function 'receiveItem' that allows the shipper to mark an harvest 'Received'
     // Use the above modifiers to check if the harvest is shipped
     function deliver(uint _shipmentId) public
-    // Call modifier to check if upc has passed previous supply chain stage
-
+        shipmentExists(_shipmentId)
     // Access Control List enforced by calling Smart Contract / DApp
     {
+
         Shipment storage shipment_ = shipments[_shipmentId];
+        require(shipment_.delivered == false, ERROR_ALREADY_DELIVERED);
+        Purchase storage purchase_ = purchases[shipment_.purchaseId];
+
         shipment_.delivered = true;
         shipment_.dateDelivered = now;
 
+        //starOwner.transfer(starCost);
         emit Delivered(_shipmentId);
     }
 

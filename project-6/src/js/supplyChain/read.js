@@ -26,6 +26,7 @@ var SupplyChainRead = {
         console.log('Purchase Id', App.ship.purchaseId);
         const instance = await App.contracts.SupplyChain.at(App.contract)
         const purchase = await instance.fetchPurchase(App.ship.purchaseId)
+
         return purchase
     },
 

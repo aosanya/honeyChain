@@ -35,6 +35,7 @@ contract('SupplyChain', function(accounts) {
 
     const quantity = 10000
     //
+    const orderId_1 = 1
     const orderQuantity_1 = quantity / 2
     const price_1 = 10
     const shippingCost_1 = 1
@@ -190,7 +191,7 @@ contract('SupplyChain', function(accounts) {
         })
 
         it("Testing smart contract function sendQuote() that allows a harvester to sendQuote", async() => {
-            await supplyChain.sendQuote(1, price_1, shippingCost_1, downPayment_1, {from : harvesterId_1})
+            await supplyChain.sendQuote(orderId_1, price_1, shippingCost_1, downPayment_1, {from : harvesterId_1})
 
             const resultOrder1 = await supplyChain.fetchQuote(1)
             assert.equal(resultOrder1[0], quoteId_1, 'Error: Invalid QuoteId')
@@ -216,7 +217,7 @@ contract('SupplyChain', function(accounts) {
 
             await supplyChain.harvestItem(upc1,  originBeeKeeperID1, originBeeKeeperName1, originBeeKeeperInformation1, originBeeKeeperLatitude1, originBeeKeeperLongitude1, quantity, productNotes, {from: harvesterId_1})
             await supplyChain.placeOrder(upc1, orderQuantity_1, {from : buyerId_1})
-            await supplyChain.sendQuote(1, price_1, shippingCost_1, downPayment_1)
+            await supplyChain.sendQuote(orderId_1, price_1, shippingCost_1, downPayment_1)
         })
 
         it("Testing smart contract function Purchased() that allows a buyer to purchase", async() => {
@@ -242,7 +243,7 @@ contract('SupplyChain', function(accounts) {
 
             await supplyChain.harvestItem(upc1,  originBeeKeeperID1, originBeeKeeperName1, originBeeKeeperInformation1, originBeeKeeperLatitude1, originBeeKeeperLongitude1, quantity, productNotes, {from: harvesterId_1})
             await supplyChain.placeOrder(upc1, orderQuantity_1, {from : buyerId_1})
-            await supplyChain.sendQuote(orderQuantity_1, price_1, shippingCost_1, downPayment_1)
+            await supplyChain.sendQuote(orderId_1, price_1, shippingCost_1, downPayment_1)
             await supplyChain.purchase(quoteId_1)
         })
 
@@ -274,7 +275,7 @@ contract('SupplyChain', function(accounts) {
 
             await supplyChain.harvestItem(upc1, originBeeKeeperID1, originBeeKeeperName1, originBeeKeeperInformation1, originBeeKeeperLatitude1, originBeeKeeperLongitude1, quantity, productNotes, {from: harvesterId_1})
             await supplyChain.placeOrder(upc1, orderQuantity_1, {from : buyerId_1})
-            await supplyChain.sendQuote(orderQuantity_1, price_1, shippingCost_1, downPayment_1)
+            await supplyChain.sendQuote(orderId_1, price_1, shippingCost_1, downPayment_1)
             await supplyChain.purchase(quoteId_1)
             await supplyChain.ship(purchaseId_1, {from: shipperId_1})
         })
@@ -290,14 +291,48 @@ contract('SupplyChain', function(accounts) {
             assert.equal(resultShip1[4], true, 'Error: Should be Delivered')
         })
 
+
+    })
+
+    context('deliver', () => {
+        var supplyChain
+
+        before(async () => {
+            supplyChain = await SupplyChain.deployed()
+
+            // Watch the emitted event Harvested()
+            var event = supplyChain.Harvested({fromBlock: 0})
+
+            await event.watch((err, res) => {
+                eventEmitted = true
+            })
+
+            await supplyChain.harvestItem(upc1, originBeeKeeperID1, originBeeKeeperName1, originBeeKeeperInformation1, originBeeKeeperLatitude1, originBeeKeeperLongitude1, quantity, productNotes, {from: harvesterId_1})
+            await supplyChain.placeOrder(upc1, orderQuantity_1, {from : buyerId_1})
+            await supplyChain.sendQuote(orderId_1, price_1, shippingCost_1, downPayment_1)
+            await supplyChain.purchase(quoteId_1)
+            await supplyChain.ship(purchaseId_1, {from: shipperId_1})
+        })
+
         it("Cannot Deliver what is already delivered", async() => {
-            await supplyChain.deliver(shipmentId_1, {from: buyerId_1})
+            //await supplyChain.deliver(shipmentId_1, {from: buyerId_1})
             const resultShip1 = await supplyChain.fetchShipment(shipmentId_1)
 
             assert.equal(resultShip1[0], shipmentId_1, 'Error: Invalid ShipmentId')
             assert.equal(resultShip1[1], shipperId_1, 'Error: Invalid ShipperId')
             assert.equal(resultShip1[2], purchaseId_1, 'Error: Invalid PurchaseId')
             assert.equal(resultShip1[4], true, 'Error: Should be Delivered')
+
+            try{
+                await supplyChain.deliver(shipmentId_1, {from: buyerId_1})
+            }
+            catch (error){
+                //assert.isTrue(error.toString().includes("revert ERROR_ALREADY_DELIVERED"), "Unexpected throw recieved")
+                return
+            }
+            assert.fail('Expected throw not recieved')
+
+
         })
 
     })
