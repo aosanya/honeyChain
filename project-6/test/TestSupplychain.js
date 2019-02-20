@@ -163,6 +163,12 @@ contract('SupplyChain', function(accounts) {
             assert.equal(resultOrder1[1], buyerId_1, 'Error: Invalid BuyerId')
             assert.equal(resultOrder1[2], upc1, 'Error: Invalid UPC')
             assert.equal(resultOrder1[3], orderQuantity_1, 'Error: Invalid Quantity')
+
+            await supplyChain.placeOrder(upc1, orderQuantity_1, {from : buyerId_1})
+
+            const resultOrder2 = await supplyChain.fetchOrder(2)
+            assert.equal(resultOrder2[0], 2, 'Error: Invalid OrderId')
+
         })
     })
 
@@ -216,7 +222,6 @@ contract('SupplyChain', function(accounts) {
         it("Testing smart contract function Purchased() that allows a buyer to purchase", async() => {
             await supplyChain.purchase(quoteId_1)
             const resultPurchase1 = await supplyChain.fetchPurchase(purchaseId_1)
-
             assert.equal(resultPurchase1[0], 1, 'Error: Invalid PurchaseId')
             assert.equal(resultPurchase1[1], 1, 'Error: Invalid QuoteId')
         })
@@ -284,6 +289,17 @@ contract('SupplyChain', function(accounts) {
             assert.equal(resultShip1[2], purchaseId_1, 'Error: Invalid PurchaseId')
             assert.equal(resultShip1[4], true, 'Error: Should be Delivered')
         })
+
+        it("Cannot Deliver what is already delivered", async() => {
+            await supplyChain.deliver(shipmentId_1, {from: buyerId_1})
+            const resultShip1 = await supplyChain.fetchShipment(shipmentId_1)
+
+            assert.equal(resultShip1[0], shipmentId_1, 'Error: Invalid ShipmentId')
+            assert.equal(resultShip1[1], shipperId_1, 'Error: Invalid ShipperId')
+            assert.equal(resultShip1[2], purchaseId_1, 'Error: Invalid PurchaseId')
+            assert.equal(resultShip1[4], true, 'Error: Should be Delivered')
+        })
+
     })
 });
 

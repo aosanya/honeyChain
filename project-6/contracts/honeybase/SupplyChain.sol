@@ -264,11 +264,8 @@ contract SupplyChain {
     // Define a function 'sellItem' that allows a farmer to mark an harvest 'ForSale'
     function purchase(uint _quoteId) public
     // Call modifier to check if upc has passed previous supply chain stage
-
     // Call modifier to verify caller of this function
-
     {
-
         Purchase storage purchase_ = purchases[purchaseId];
         purchase_.quoteId = _quoteId;
         purchase_.purchaseId = purchaseId;
@@ -282,7 +279,6 @@ contract SupplyChain {
     // Use the above modifers to check if the harvest is sold
     function ship(uint _purchaseId) public
       // Call modifier to check if upc has passed previous supply chain stage
-
       // Call modifier to verify caller of this function
 
     {

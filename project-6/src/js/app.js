@@ -123,6 +123,22 @@ App = {
         App.deliver.shippingId = $("#deliverShippingId").val();
     },
 
+    assignShippingDetails: function (shipping){
+        $("#shipPurchaseId").val(shipping[2]);
+    },
+
+    assignPurchaseDetails: function (purchase){
+        $("#purchaseQuoteId").val(purchase[1]);
+    },
+
+    assignQuoteDetails: function (quote){
+        $("#orderId").val(quote[1]);
+    },
+
+    assignOrderDetails: function (order){
+        $("#orderUpc").val(order[2]);
+    },
+
     initWeb3: async function () {
         // Find or Inject Web3 Provider
         /// Modern dapp browsers...
@@ -232,14 +248,42 @@ App = {
                 Display.showTx(resultDeliverTx);
                 return;
             case "fetchHarvest":
+                App.readHarvestForm();
                 const result = await SupplyChainRead.fetchHarvest(event);
                 Tabs.showContainer("productSummary", true)
                 Display.showHarvest(result);
                 return;
-            case "orderShowHarvest":
-                const result = await SupplyChainRead.fetchHarvest(event);
-                Tabs.showContainer("productSummary", true)
-                Display.showHarvest(result);
+            case "displayHarvestDetails":
+                App.readOrderForm()
+                const harvest = await SupplyChainRead.fetchHarvest(event)
+                Display.showHarvestDetails(harvest);
+                return;
+            case "displayOrderDetails":
+                App.readQuoteForm();
+                const order = await SupplyChainRead.fetchOrder(event)
+                App.assignOrderDetails(order);
+                Display.showOrderDetails(order);
+                return;
+            case "displayQuoteDetails":
+                App.readPurchaseForm();
+                const quote = await SupplyChainRead.fetchQuote(event);
+                App.assignQuoteDetails(quote);
+                Display.showQuoteDetails(quote);
+                return;
+            case "displayPurchaseDetails":
+                App.readShipForm();
+                const purchase = await SupplyChainRead.fetchPurchase(event);
+                App.assignPurchaseDetails(purchase);
+                Display.showPurchaseDetails(purchase);
+                return;
+            case "displayShippingDetails":
+                App.readDeliverForm()
+                const shipping = await SupplyChainRead.fetchShipment(event)
+                App.assignShippingDetails(shipping);
+                Display.showShippingDetails(shipping);
+                return;
+            case "displayDeliverDetails":
+                Display.showDeliveryDetails(await SupplyChainRead.fetchHarvest(event));
                 return;
             case 10:
                 return await App.fetchItemBufferTwo(event);

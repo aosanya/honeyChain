@@ -117,11 +117,11 @@
                     UPC
                     <br>
                     <input type="number" id="orderUpc" name="orderUpc" value=>
-                    <button class="btn-Info" id="button" type="button" data-id="orderShowHarvest"><span class="glyphicon glyphicon-zoom-in"></span></button>
-                    <br>
-                    <div id="orderHarvestDetails">
+                    <span class="btn-Info glyphicon glyphicon-zoom-in" data-id="displayHarvestDetails"></span>
+                    <div class="details Hidden" name="HarvestDetails">
 
                     </div>
+                    <br>
                     Quantity
                     <br>
                     <input type="number" id="orderQuantity" name="orderQuantity" value=>Liters<br>
@@ -134,7 +134,12 @@
                 <div class="form-group">
                     Order Id
                     <br>
-                    <input type="number" id="orderId" name="orderId" value=><br>
+                    <input type="number" id="orderId" name="orderId" value=>
+                    <span class="btn-Info glyphicon glyphicon-zoom-in" data-id="displayOrderDetails"></span>
+                    <div class="details Hidden" name="OrderDetails">
+
+                    </div>
+                    <br>
                     Price
                     <br>
                     <input type="number" id="orderPrice" name="orderPrice" value=>ETH<br>
@@ -151,9 +156,14 @@
             <div class="form Hidden" name="purchaseForm" id="purchaseForm">
                 <h2>Purchase</h2>
                 <div class="form-group">
-                    Quote Id
+                    Quote ID
                     <br>
-                    <input type="number" id="purchaseQuoteId" name="purchaseQuoteId" value=><br>
+                    <input type="number" id="purchaseQuoteId" name="purchaseQuoteId" value=>
+                    <span class="btn-Info glyphicon glyphicon-zoom-in" data-id="displayQuoteDetails"></span>
+                    <div class="details Hidden" name="QuoteDetails">
+
+                    </div>
+                    <br>
                     <button class="btn-purchase" id="button" type="button" data-id="purchase">Purchase</button>
                 </div>
                 <div class=form-break></div>
@@ -163,7 +173,12 @@
                 <div class="form-group">
                     Purchase Id
                     <br>
-                    <input type="number" id="shipPurchaseId" name="shipPurchaseId" value=><br>
+                    <input type="number" id="shipPurchaseId" name="shipPurchaseId" value=>
+                    <span class="btn-Info glyphicon glyphicon-zoom-in" data-id="displayPurchaseDetails"></span>
+                    <div class="details Hidden" name="PurchaseDetails">
+
+                    </div>
+                    <br>
                     <button class="btn-ship" id="button" type="button" data-id="ship">Ship</button>
                 </div>
                 <div class=form-break></div>
@@ -173,11 +188,19 @@
                 <div class="form-group">
                     Shipping Id
                     <br>
-                    <input type="number" id="deliverShippingId" name="deliverShippingId" value=><br>
-                    <button class="btn-deliver" id="button" type="button" data-id="deliver">Deliver</button>
+                    <input type="number" id="deliverShippingId" name="deliverShippingId" value=>
+                    <span class="btn-Info glyphicon glyphicon-zoom-in" data-id="displayShippingDetails"></span>
+                    <div class="details Hidden" name="ShippingDetails">
+
+                    </div>
+                    <br>
+                    <button class="btn-deliver Hidden" id="button" name="deliverButton" type="button" data-id="deliver">Delivered</button>
+                    <br>
+                    <div class="message success Hidden" name="deliverMessage"></div>
                 </div>
                 <div class=form-break></div>
             </div>
+
             <div class="container Hidden">
                 <h2>Product Details</h2>
                 <div class="form-group">

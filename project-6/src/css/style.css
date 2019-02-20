@@ -35,7 +35,6 @@ button {
     padding: 16px 32px;
     text-decoration: none;
     margin: 4px 2px;
-    cursor: pointer;
 }
 
 
@@ -62,11 +61,9 @@ button {
 }
 
 .form-group {
-  background-color:#0097A7;
   color:black;
   padding:30px;
   border-radius: 4px;
-  background-color: #f8f8f8;
 }
 
 .form-break {
@@ -144,16 +141,77 @@ li {
 }
 
 .btn-Info{
+  cursor: pointer;
+  background-color: #4CAF50;
+  border: none;
+  color: white;
+  background-color: #00BCD4;
+  font-size: 16px;
+  text-decoration: none;
   padding: 10px;
   margin: 0;
 }
 
-.Info {
-  background-color:#fdfdfd;
-  width: 80%;
+.btn-SubInfo{
+  cursor: pointer;
+  background-color: #4CAF50;
+  border: none;
+  color: white;
+  background-color: #00BCD4;
+  font-size: 13px;
+  text-decoration: none;
+  padding: 5px 5px 5px 5px;
+  margin: 0 5px 0 5px;
+}
+
+.details {
+  font-size: 11px;
+  /* width: 75%; */
+  /* border-bottom: 2px solid #dad7d7;
+  border-top: 2px solid #dad7d7; */
+  margin: 0 10px;
+
+}
+
+.detail {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #dad7d7;
+}
+
+.detailTitle {
+  width: 40%;
+  padding: 0px 5px;
+  margin: 8px 0;
+}
+
+.detailInfo {
+  /* width: 80%; */
   padding: 12px 20px;
   margin: 10px 0;
-  border-color: #f1f1f1;
-  border-style: solid;
-  border-width: 1px;
+
+}
+
+.alternating {
+  /* border-bottom: 1px solid #dad7d7;
+  border-top: 1px solid #dad7d7; */
+}
+
+.header {
+  font-weight: bold;
+  padding-bottom: 10px;
+  padding-top: 10px;
+  border-bottom: 1px solid #dad7d7;
+}
+
+.message {
+  margin: 10px 0;
+  font-size: 15px;
+}
+.success {
+  color: #228B22;
+}
+
+.warning {
+  color: #8B0000;
 }
