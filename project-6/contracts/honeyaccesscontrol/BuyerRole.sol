@@ -11,6 +11,8 @@ contract BuyerRole {
     event BuyerAdded(address indexed account);
     event BuyerRemoved(address indexed account);
 
+    string private constant ERROR_IS_NOT_BUYER = "ERROR_IS_NOT_BUYER";
+
     // Define a struct 'buyers' by inheriting from 'Roles' library, struct Role
     Roles.Role private buyers;
 
@@ -21,7 +23,7 @@ contract BuyerRole {
 
     // Define a modifier that checks to see if msg.sender has the appropriate role
     modifier onlyBuyer() {
-        require(isBuyer(msg.sender), "Is not Buyer");
+        require(isBuyer(msg.sender), ERROR_IS_NOT_BUYER);
         _;
     }
 

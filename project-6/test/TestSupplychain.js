@@ -72,10 +72,15 @@ contract('SupplyChain', function(accounts) {
     console.log("Buyer: accounts[3] ", accounts[3])
     console.log("Shipper: accounts[4] ", accounts[4])
 
+    var supplyChain
+    before(async () => {
+        supplyChain = await SupplyChain.deployed()
+        supplyChain.addHarvester(harvesterId_1)
+    })
+
     context('harvest Honey', () => {
-        // 1st Test
+
         it("Testing smart contract function harvestItem() that allows a harvester to harvest honey", async() => {
-            const supplyChain = await SupplyChain.deployed()
             // Declare and Initialize a variable for event
             var eventEmitted = false
 
@@ -108,7 +113,6 @@ contract('SupplyChain', function(accounts) {
         })
 
         it("Testing smart contract function harvestItem() that allows a harvester to harvest honey with upc2", async() => {
-            const supplyChain = await SupplyChain.deployed()
             // Declare and Initialize a variable for event
             var eventEmitted = false
 
@@ -142,9 +146,7 @@ contract('SupplyChain', function(accounts) {
     })
 
     context('place Order', () => {
-        var supplyChain
         before(async () => {
-            supplyChain = await SupplyChain.deployed()
 
             // Watch the emitted event PlacedOrder()
             var event = supplyChain.PlacedOrder()
@@ -174,10 +176,7 @@ contract('SupplyChain', function(accounts) {
     })
 
     context('send quote', () => {
-        var supplyChain
-
         before(async () => {
-            supplyChain = await SupplyChain.deployed()
 
             // Watch the emitted event Harvested()
             var event = supplyChain.SentQuote({fromBlock: 0})
@@ -203,10 +202,7 @@ contract('SupplyChain', function(accounts) {
     })
 
     context('purchase', () => {
-        var supplyChain
-
         before(async () => {
-            supplyChain = await SupplyChain.deployed()
 
             // Watch the emitted event Harvested()
             var event = supplyChain.Purchased({fromBlock: 0})
@@ -229,10 +225,8 @@ contract('SupplyChain', function(accounts) {
     })
 
     context('ship', () => {
-        var supplyChain
 
         before(async () => {
-            supplyChain = await SupplyChain.deployed()
 
             // Watch the emitted event Harvested()
             var event = supplyChain.Harvested({fromBlock: 0})
@@ -261,10 +255,8 @@ contract('SupplyChain', function(accounts) {
     })
 
     context('deliver', () => {
-        var supplyChain
 
         before(async () => {
-            supplyChain = await SupplyChain.deployed()
 
             // Watch the emitted event Harvested()
             var event = supplyChain.Harvested({fromBlock: 0})
@@ -295,10 +287,8 @@ contract('SupplyChain', function(accounts) {
     })
 
     context('deliver', () => {
-        var supplyChain
 
         before(async () => {
-            supplyChain = await SupplyChain.deployed()
 
             // Watch the emitted event Harvested()
             var event = supplyChain.Harvested({fromBlock: 0})
@@ -331,8 +321,6 @@ contract('SupplyChain', function(accounts) {
                 return
             }
             assert.fail('Expected throw not recieved')
-
-
         })
 
     })

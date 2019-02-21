@@ -1,9 +1,16 @@
 pragma solidity ^0.4.24;
+
+import "../honeyaccesscontrol/HarvesterRole.sol";
 // Define a contract 'Supplychain'
-contract SupplyChain {
+contract SupplyChain is HarvesterRole {
 
     // Define 'owner'
     address owner;
+
+    bytes32 public constant OWNER_ROLE = keccak256("OWNER_ROLE");
+    bytes32 public constant HARVEST_ROLE = keccak256("HARVEST_ROLE");
+    bytes32 public constant BUYER_ROLE = keccak256("BUYER_ROLE");
+    bytes32 public constant SHIPPER_ROLE = keccak256("SHIPPER_ROLE");
 
     // Define a variable called 'upc' for Universal Product Code (UPC)
     // uint  upc;
@@ -187,6 +194,7 @@ contract SupplyChain {
 
     // Define a function 'harvestItem' that allows a farmer to mark an harvest 'Harvested'
     function harvestItem(uint _upc, address _originBeekeeperID, string _originBeekeeperName, string _originFarmInformation, string  _originFarmLatitude, string  _originFarmLongitude, uint _quantity, string  _productNotes) public
+    onlyHarvester()
     {
         // Add the new harvest as part of Harvest
         Harvest storage harvest_ = harvests[_upc];
@@ -226,6 +234,7 @@ contract SupplyChain {
     // Define a function 'packItem' that allows a farmer to mark an harvest 'Packed'
     function sendQuote(uint _orderId, uint _price, uint _shippingCost,uint _downPayment) public
     orderExists(_orderId)
+    onlyHarvester()
     // Call modifier to verify caller of this function
 
     {

@@ -11,6 +11,8 @@ contract HarvesterRole {
     event HarvesterAdded(address indexed account);
     event HarvesterRemoved(address indexed account);
 
+    string private constant ERROR_IS_NOT_HARVESTER = "ERROR_IS_NOT_HARVESTER";
+
     // Define a struct 'harvesters' by inheriting from 'Roles' library, struct Role
     Roles.Role private harvesters;
 
@@ -21,7 +23,7 @@ contract HarvesterRole {
 
     // Define a modifier that checks to see if msg.sender has the appropriate role
     modifier onlyHarvester() {
-        require(isHarvester(msg.sender), "Is not Harvester");
+        require(isHarvester(msg.sender), ERROR_IS_NOT_HARVESTER);
         _;
     }
 

@@ -11,6 +11,8 @@ contract BeeKeeperRole {
     event BeeKeeperAdded(address indexed account);
     event BeeKeeperRemoved(address indexed account);
 
+    string private constant ERROR_IS_NOT_BEEKEEPER = "ERROR_IS_NOT_BEEKEEPER";
+
     // Define a struct 'beeKeepers' by inheriting from 'Roles' library, struct Role
     Roles.Role private beeKeepers;
 
@@ -21,7 +23,7 @@ contract BeeKeeperRole {
 
     // Define a modifier that checks to see if msg.sender has the appropriate role
     modifier onlyBeeKeeper() {
-        require(isBeeKeeper(msg.sender), "Is not BeeKeeper");
+        require(isBeeKeeper(msg.sender), ERROR_IS_NOT_BEEKEEPER);
         _;
     }
 

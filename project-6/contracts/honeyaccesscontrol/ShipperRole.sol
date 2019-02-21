@@ -11,6 +11,8 @@ contract ShipperRole {
     event ShipperAdded(address indexed account);
     event ShipperRemoved(address indexed account);
 
+    string private constant ERROR_IS_NOT_SHIPPER = "ERROR_IS_NOT_SHIPPER";
+
     // Define a struct 'shippers' by inheriting from 'Roles' library, struct Role
     Roles.Role private shippers;
 
@@ -21,7 +23,7 @@ contract ShipperRole {
 
     // Define a modifier that checks to see if msg.sender has the appropriate role
     modifier onlyShipper() {
-        require(isShipper(msg.sender), "Is not Shipper");
+        require(isShipper(msg.sender), ERROR_IS_NOT_SHIPPER);
         _;
     }
 
