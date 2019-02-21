@@ -1,16 +1,21 @@
 pragma solidity ^0.4.24;
 
-import "../honeyaccesscontrol/HarvesterRole.sol";
+import "../honeyaccesscontrol/AccessControl.sol";
 // Define a contract 'Supplychain'
-contract SupplyChain is HarvesterRole {
+contract SupplyChain is AccessControl {
 
     // Define 'owner'
     address owner;
 
-    bytes32 public constant OWNER_ROLE = keccak256("OWNER_ROLE");
+    //bytes32 public constant OWNER_ROLE = keccak256("OWNER_ROLE");
     bytes32 public constant HARVEST_ROLE = keccak256("HARVEST_ROLE");
-    bytes32 public constant BUYER_ROLE = keccak256("BUYER_ROLE");
-    bytes32 public constant SHIPPER_ROLE = keccak256("SHIPPER_ROLE");
+    bytes32 public constant HARVESTER_OF_ROLE = keccak256("HARVEST_OF_ROLE");
+    bytes32 public constant ORDER_OF_ROLE = keccak256("ORDER_OF_ROLE");
+    bytes32 public constant BUYER_OF_ROLE = keccak256("BUYER_OF_ROLE");
+    bytes32 public constant SHIPPER_OF_ROLE = keccak256("SHIPPER_OF_ROLE");
+    bytes32 public constant RECIEVER_OF_ROLE = keccak256("RECIEVER_OF_ROLE");
+
+    //bytes32 public constant SHIPPER_ROLE = keccak256("SHIPPER_ROLE");
 
     // Define a variable called 'upc' for Universal Product Code (UPC)
     // uint  upc;
@@ -51,12 +56,12 @@ contract SupplyChain is HarvesterRole {
     mapping (uint => string[]) harvestsHistory;
 
     string private constant ERROR_HARVEST_DOES_NOT_EXIST = "ERROR_HARVEST_DOES_NOT_EXIST";
+    string private constant ERROR_HARVEST_ALREADY_EXISTS = "ERROR_HARVEST_ALREADY_EXISTS";
     string private constant ERROR_ORDER_DOES_NOT_EXIST = "ERROR_ORDER_DOES_NOT_EXIST";
     string private constant ERROR_QUOTE_DOES_NOT_EXIST = "ERROR_QUOTE_DOES_NOT_EXIST";
     string private constant ERROR_PURCHASE_DOES_NOT_EXIST = "ERROR_PURCHASE_DOES_NOT_EXIST";
     string private constant ERROR_SHIPMENT_DOES_NOT_EXIST = "ERROR_SHIPMENT_DOES_NOT_EXIST";
     string private constant ERROR_ALREADY_DELIVERED = "ERROR_ALREADY_DELIVERED";
-
 
     // Define enum 'State' with the following values:
     enum State
@@ -100,6 +105,7 @@ contract SupplyChain is HarvesterRole {
         uint    quoteId;
         uint    orderId;
         uint    price;
+        address shipperId;
         uint    shippingCost;
         uint    downPayment;
         uint    date;
@@ -108,6 +114,7 @@ contract SupplyChain is HarvesterRole {
     struct Purchase {
         uint    purchaseId;
         uint    quoteId;
+        uint    orderId;
         uint    date;
         uint    shipmentId;
     }
@@ -116,6 +123,7 @@ contract SupplyChain is HarvesterRole {
         uint    shipmentId;
         address shipper;
         uint    purchaseId;
+        uint    orderId;
         uint    date;
         bool    delivered;
         uint    dateDelivered;
@@ -140,6 +148,7 @@ contract SupplyChain is HarvesterRole {
         require(msg.sender == _address);
         _;
     }
+
 
     modifier harvestExists(uint _upc) {
         require(harvestUPCs[_upc] == true, ERROR_HARVEST_DOES_NOT_EXIST);
@@ -183,6 +192,12 @@ contract SupplyChain is HarvesterRole {
         quoteId = 1;
         purchaseId = 1;
         shipmentId = 1;
+        addRole(HARVEST_ROLE);
+        addRole(HARVESTER_OF_ROLE);
+        addRole(ORDER_OF_ROLE);
+        addRole(BUYER_OF_ROLE);
+        addRole(SHIPPER_OF_ROLE);
+        addRole(RECIEVER_OF_ROLE);
     }
 
     // Define a function 'kill' if required
@@ -194,8 +209,9 @@ contract SupplyChain is HarvesterRole {
 
     // Define a function 'harvestItem' that allows a farmer to mark an harvest 'Harvested'
     function harvestItem(uint _upc, address _originBeekeeperID, string _originBeekeeperName, string _originFarmInformation, string  _originFarmLatitude, string  _originFarmLongitude, uint _quantity, string  _productNotes) public
-    onlyHarvester()
+    hasPermission(HARVEST_ROLE, msg.sender, "", "Missing Harvester Role")
     {
+        require(harvestUPCs[_upc] == false, ERROR_HARVEST_ALREADY_EXISTS);
         // Add the new harvest as part of Harvest
         Harvest storage harvest_ = harvests[_upc];
         harvest_.sku = sku;
@@ -210,21 +226,24 @@ contract SupplyChain is HarvesterRole {
         harvest_.productNotes = _productNotes;
         harvest_.harvesterId = msg.sender;
         harvestUPCs[_upc] = true;
+        addPermission(HARVESTER_OF_ROLE, msg.sender, bytes32(_upc));
         emit Harvested(_upc);
         sku = sku + 1;
     }
 
     function placeOrder(uint _upc, uint quantity) public
     harvestExists(_upc)
-    // Call modifier to verify caller of this function
+    // Anybody can Place an Order
 
     {
+        Harvest storage harvest_ = harvests[_upc];
         Order storage order_ = orders[orderId];
         order_.orderId = orderId;
         order_.buyerId = msg.sender;
         order_.upc = _upc;
         order_.quantity = quantity;
         orderIds[orderId] = true;
+        addPermission(ORDER_OF_ROLE, msg.sender, bytes32(orderId));
 
         emit PlacedOrder(orderId, quantity);
 
@@ -232,20 +251,23 @@ contract SupplyChain is HarvesterRole {
     }
 
     // Define a function 'packItem' that allows a farmer to mark an harvest 'Packed'
-    function sendQuote(uint _orderId, uint _price, uint _shippingCost,uint _downPayment) public
+    function sendQuote(uint _orderId, uint _price, address _shipperId, uint _shippingCost,uint _downPayment) public
     orderExists(_orderId)
-    onlyHarvester()
-    // Call modifier to verify caller of this function
-
+    hasPermission(HARVESTER_OF_ROLE, msg.sender, bytes32(_orderId) ,"Missing HARVESTER_OF_ROLE")
     {
+        //TO DO Only this Harvester can quote
         Quote storage quote_ = quotes[quoteId];
         quote_.quoteId = quoteId;
         quote_.orderId = _orderId;
         quote_.price = _price;
+        quote_.shipperId = _shipperId;
         quote_.shippingCost = _shippingCost;
         quote_.downPayment = _downPayment;
         quote_.date = now;
         quoteIds[quoteId] = true;
+
+        Order storage order_ = orders[_orderId];
+        addPermission(BUYER_OF_ROLE, order_.buyerId, bytes32(quote_.quoteId));
 
         emit SentQuote(quoteId);
         quoteId = quoteId + 1;
@@ -254,13 +276,19 @@ contract SupplyChain is HarvesterRole {
     // Define a function 'sellItem' that allows a farmer to mark an harvest 'ForSale'
     function purchase(uint _quoteId) public
     quoteExists(_quoteId)
-    // Call modifier to verify caller of this function
+    hasPermission(BUYER_OF_ROLE, msg.sender, bytes32(_quoteId) ,"Missing BUYER_OF_ROLE")
     {
         Purchase storage purchase_ = purchases[purchaseId];
+        Quote storage quote_ = quotes[_quoteId];
         purchase_.quoteId = _quoteId;
         purchase_.purchaseId = purchaseId;
+        purchase_.orderId = quote_.orderId;
         purchase_.date = now;
         purchaseIds[purchaseId] = true;
+
+
+        addPermission(SHIPPER_OF_ROLE, quote_.shipperId, bytes32(purchase_.purchaseId));
+
         emit Purchased(purchaseId);
         purchaseId = purchaseId + 1;
     }
@@ -269,14 +297,20 @@ contract SupplyChain is HarvesterRole {
     // Use the above modifers to check if the harvest is sold
     function ship(uint _purchaseId) public
       purchaseExists(_purchaseId)
-      // Call modifier to verify caller of this function
+      hasPermission(SHIPPER_OF_ROLE, msg.sender, bytes32(_purchaseId) ,"Missing SHIPPER_OF_ROLE")
     {
+        Purchase storage purchase_ = purchases[_purchaseId];
         Shipment storage shipment_ = shipments[shipmentId];
         shipment_.shipmentId = shipmentId;
+        shipment_.purchaseId = _purchaseId;
+        shipment_.orderId = purchase_.orderId;
         shipment_.shipper = msg.sender;
         shipment_.purchaseId = _purchaseId;
         shipment_.date = now;
         shipmentIds[shipmentId] = true;
+
+        Order storage order_ = orders[shipment_.orderId];
+        addPermission(RECIEVER_OF_ROLE, order_.buyerId, bytes32(shipment_.shipmentId));
 
         emit Shipped(shipmentId);
         shipmentId = shipmentId + 1;
@@ -287,7 +321,7 @@ contract SupplyChain is HarvesterRole {
     // Use the above modifiers to check if the harvest is shipped
     function deliver(uint _shipmentId) public
         shipmentExists(_shipmentId)
-    // Access Control List enforced by calling Smart Contract / DApp
+        hasPermission(RECIEVER_OF_ROLE, msg.sender, bytes32(_shipmentId) ,"Missing RECIEVER_OF_ROLE")
     {
 
         Shipment storage shipment_ = shipments[_shipmentId];
@@ -383,6 +417,7 @@ contract SupplyChain is HarvesterRole {
     uint    quoteId,
     uint    orderId,
     uint    price,
+    address shipperId,
     uint    shippingCost,
     uint    downPayment,
     uint    date
@@ -392,6 +427,7 @@ contract SupplyChain is HarvesterRole {
         quoteId = quote_.quoteId;
         orderId = quote_.orderId;
         price = quote_.price;
+        shipperId = quote_.shipperId;
         shippingCost = quote_.shippingCost;
         downPayment = quote_.downPayment;
         date = quote_.date;
