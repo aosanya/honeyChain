@@ -62,6 +62,7 @@ contract SupplyChain is AccessControl {
     string private constant ERROR_PURCHASE_DOES_NOT_EXIST = "ERROR_PURCHASE_DOES_NOT_EXIST";
     string private constant ERROR_SHIPMENT_DOES_NOT_EXIST = "ERROR_SHIPMENT_DOES_NOT_EXIST";
     string private constant ERROR_ALREADY_DELIVERED = "ERROR_ALREADY_DELIVERED";
+    string private constant ERROR_SHIPPINGDOWNPAYMENT = "ERROR_SHIPPINGDOWNPAYMENT_MORE_THAN_SHIPPINGCOST";
 
     // Define enum 'State' with the following values:
     enum State
@@ -104,10 +105,11 @@ contract SupplyChain is AccessControl {
     struct Quote {
         uint    quoteId;
         uint    orderId;
+        uint    upc;
         uint    price;
         address shipperId;
         uint    shippingCost;
-        uint    downPayment;
+        uint    shippingDownPayment;
         uint    date;
     }
 
@@ -115,6 +117,7 @@ contract SupplyChain is AccessControl {
         uint    purchaseId;
         uint    quoteId;
         uint    orderId;
+        uint    upc;
         uint    date;
         uint    shipmentId;
     }
@@ -123,7 +126,9 @@ contract SupplyChain is AccessControl {
         uint    shipmentId;
         address shipper;
         uint    purchaseId;
+        uint    quoteId;
         uint    orderId;
+        uint    upc;
         uint    date;
         bool    delivered;
         uint    dateDelivered;
@@ -251,22 +256,23 @@ contract SupplyChain is AccessControl {
     }
 
     // Define a function 'packItem' that allows a farmer to mark an harvest 'Packed'
-    function sendQuote(uint _orderId, uint _price, address _shipperId, uint _shippingCost,uint _downPayment) public
+    function sendQuote(uint _orderId, uint _price, address _shipperId, uint _shippingCost,uint _shippingDownPayment) public
     orderExists(_orderId)
     hasPermission(HARVESTER_OF_ROLE, msg.sender, bytes32(_orderId) ,"Missing HARVESTER_OF_ROLE")
     {
-        //TO DO Only this Harvester can quote
+        require(_shippingDownPayment <= _shippingCost, ERROR_SHIPPINGDOWNPAYMENT);
+        Order storage order_ = orders[_orderId];
         Quote storage quote_ = quotes[quoteId];
         quote_.quoteId = quoteId;
         quote_.orderId = _orderId;
+        quote_.upc = order_.upc;
         quote_.price = _price;
         quote_.shipperId = _shipperId;
         quote_.shippingCost = _shippingCost;
-        quote_.downPayment = _downPayment;
+        quote_.shippingDownPayment = _shippingDownPayment;
         quote_.date = now;
         quoteIds[quoteId] = true;
 
-        Order storage order_ = orders[_orderId];
         addPermission(BUYER_OF_ROLE, order_.buyerId, bytes32(quote_.quoteId));
 
         emit SentQuote(quoteId);
@@ -276,16 +282,21 @@ contract SupplyChain is AccessControl {
     // Define a function 'sellItem' that allows a farmer to mark an harvest 'ForSale'
     function purchase(uint _quoteId) public
     quoteExists(_quoteId)
-    hasPermission(BUYER_OF_ROLE, msg.sender, bytes32(_quoteId) ,"Missing BUYER_OF_ROLE")
+    hasPermission(BUYER_OF_ROLE, msg.sender, bytes32(_quoteId) ,"Missing BUYER_OF_ROLE") payable
     {
-        Purchase storage purchase_ = purchases[purchaseId];
         Quote storage quote_ = quotes[_quoteId];
+        Purchase storage purchase_ = purchases[purchaseId];
         purchase_.quoteId = _quoteId;
         purchase_.purchaseId = purchaseId;
         purchase_.orderId = quote_.orderId;
+        purchase_.upc = quote_.upc;
         purchase_.date = now;
         purchaseIds[purchaseId] = true;
 
+        quote_.shipperId.transfer(quote_.shippingDownPayment);
+        if(msg.value > quote_.shippingDownPayment) {
+            msg.sender.transfer(msg.value - quote_.shippingDownPayment);
+        }
 
         addPermission(SHIPPER_OF_ROLE, quote_.shipperId, bytes32(purchase_.purchaseId));
 
@@ -303,7 +314,9 @@ contract SupplyChain is AccessControl {
         Shipment storage shipment_ = shipments[shipmentId];
         shipment_.shipmentId = shipmentId;
         shipment_.purchaseId = _purchaseId;
+        shipment_.quoteId = purchase_.quoteId;
         shipment_.orderId = purchase_.orderId;
+        shipment_.upc = purchase_.upc;
         shipment_.shipper = msg.sender;
         shipment_.purchaseId = _purchaseId;
         shipment_.date = now;
@@ -331,6 +344,10 @@ contract SupplyChain is AccessControl {
         shipment_.delivered = true;
         shipment_.dateDelivered = now;
 
+        Harvest storage harvest_ = harvests[shipment_.upc];
+        Quote storage quote_ = quotes[shipment_.quoteId];
+
+        //shipment_.shipper.transfer(quote_.)
         //starOwner.transfer(starCost);
         emit Delivered(_shipmentId);
     }
@@ -419,7 +436,7 @@ contract SupplyChain is AccessControl {
     uint    price,
     address shipperId,
     uint    shippingCost,
-    uint    downPayment,
+    uint    shippingDownPayment,
     uint    date
     )
     {
@@ -429,7 +446,7 @@ contract SupplyChain is AccessControl {
         price = quote_.price;
         shipperId = quote_.shipperId;
         shippingCost = quote_.shippingCost;
-        downPayment = quote_.downPayment;
+        shippingDownPayment = quote_.shippingDownPayment;
         date = quote_.date;
     }
 

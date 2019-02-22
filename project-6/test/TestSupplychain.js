@@ -43,8 +43,8 @@ contract('SupplyChain', function(accounts) {
     const orderId_1 = 1
     const orderQuantity_1 = quantity / 2
     const price_1 = 10
-    const shippingCost_1 = 1
-    const downPayment_1 = 2
+    const shippingCost_1 = 4
+    const shippingDownPayment_1 = 2
     const purchaseId_1 = 1
     const shipmentId_1 = 1
     const quoteId_1 = 1
@@ -208,7 +208,7 @@ contract('SupplyChain', function(accounts) {
         it("Testing smart contract function sendQuote() that allows a harvester to sendQuote", async() => {
             await supplyChain.harvestItem(upc1,  originBeeKeeperID1, originBeeKeeperName1, originBeeKeeperInformation1, originBeeKeeperLatitude1, originBeeKeeperLongitude1, quantity, productNotes, {from: harvesterId_1})
             await supplyChain.placeOrder(upc1, orderQuantity_1, {from : buyerId_1})
-            await supplyChain.sendQuote(orderId_1, price_1, shipperId_1, shippingCost_1, downPayment_1, {from : harvesterId_1})
+            await supplyChain.sendQuote(orderId_1, price_1, shipperId_1, shippingCost_1, shippingDownPayment_1, {from : harvesterId_1})
 
             const resultOrder1 = await supplyChain.fetchQuote(1)
             assert.equal(resultOrder1[0], quoteId_1, 'Error: Invalid QuoteId')
@@ -216,7 +216,7 @@ contract('SupplyChain', function(accounts) {
             assert.equal(resultOrder1[2], price_1, 'Error: Invalid Price')
             assert.equal(resultOrder1[3], shipperId_1, 'Error: Invalid Shipper Address')
             assert.equal(resultOrder1[4], shippingCost_1, 'Error: Invalid Shipping Cost')
-            assert.equal(resultOrder1[5], downPayment_1, 'Error: Invalid Downpayment')
+            assert.equal(resultOrder1[5], shippingDownPayment_1, 'Error: Invalid Shipping Downpayment')
         })
     })
 
@@ -233,12 +233,38 @@ contract('SupplyChain', function(accounts) {
         it("Testing smart contract function Purchased() that allows a buyer to purchase", async() => {
             await supplyChain.harvestItem(upc1,  originBeeKeeperID1, originBeeKeeperName1, originBeeKeeperInformation1, originBeeKeeperLatitude1, originBeeKeeperLongitude1, quantity, productNotes, {from: harvesterId_1})
             await supplyChain.placeOrder(upc1, orderQuantity_1, {from : buyerId_1})
-            await supplyChain.sendQuote(orderId_1, price_1, shipperId_1, shippingCost_1, downPayment_1, {from: harvesterId_1})
-            await supplyChain.purchase(quoteId_1, {from : buyerId_1})
+            await supplyChain.sendQuote(orderId_1, price_1, shipperId_1, shippingCost_1, shippingDownPayment_1, {from: harvesterId_1})
+            await supplyChain.purchase(quoteId_1, {from : buyerId_1, value : shippingDownPayment_1})
             const resultPurchase1 = await supplyChain.fetchPurchase(purchaseId_1)
             assert.equal(resultPurchase1[0], 1, 'Error: Invalid PurchaseId')
             assert.equal(resultPurchase1[1], 1, 'Error: Invalid QuoteId')
         })
+
+        it("Testing smart contract function Purchased() that allows a buyer to purchase", async() => {
+            await supplyChain.harvestItem(upc1,  originBeeKeeperID1, originBeeKeeperName1, originBeeKeeperInformation1, originBeeKeeperLatitude1, originBeeKeeperLongitude1, quantity, productNotes, {from: harvesterId_1})
+            await supplyChain.placeOrder(upc1, orderQuantity_1, {from : buyerId_1})
+            await supplyChain.sendQuote(orderId_1, price_1, shipperId_1, shippingCost_1, shippingDownPayment_1, {from: harvesterId_1})
+
+            let balanceBefore = web3.eth.getBalance(buyerId_1);
+            await supplyChain.purchase(quoteId_1, {from : buyerId_1, value : shippingDownPayment_1})
+
+            let balanceAfter = web3.eth.getBalance(buyerId_1);
+            let actualCost = balanceBefore - balanceAfter
+            let expectedGasPrice = actualCost - shippingDownPayment_1
+            let actualGasUsed = web3.eth.getBlock(web3.eth.blockNumber).gasUsed
+
+            // console.log("Balance Before " + balanceBefore)
+            // console.log("Balance After " + balanceAfter)
+            // console.log("Actual Cost " + actualCost)
+            // console.log("Expected Gas Price " + expectedGasPrice)
+            // console.log("Actual Gas Used " + actualGasUsed)
+            //let weiGasUsed = web3.toWei(actualGasUsed, "Gwei")
+            assert.equal(actualGasUsed, Number((expectedGasPrice/100000000000).toFixed(0)), "Gas difference can only stem from wrong account transfers")
+
+        })
+
+
+
     })
 
     context('ship', () => {
@@ -255,8 +281,8 @@ contract('SupplyChain', function(accounts) {
         it("Testing smart contract function ship() that allows a shipper to ship honey", async() => {
             await supplyChain.harvestItem(upc1,  originBeeKeeperID1, originBeeKeeperName1, originBeeKeeperInformation1, originBeeKeeperLatitude1, originBeeKeeperLongitude1, quantity, productNotes, {from: harvesterId_1})
             await supplyChain.placeOrder(upc1, orderQuantity_1, {from : buyerId_1})
-            await supplyChain.sendQuote(orderId_1, price_1, shipperId_1, shippingCost_1, downPayment_1, {from: harvesterId_1})
-            await supplyChain.purchase(quoteId_1, {from : buyerId_1})
+            await supplyChain.sendQuote(orderId_1, price_1, shipperId_1, shippingCost_1, shippingDownPayment_1, {from: harvesterId_1})
+            await supplyChain.purchase(quoteId_1, {from : buyerId_1, value : shippingDownPayment_1})
             await supplyChain.ship(purchaseId_1, {from: shipperId_1})
             const resultShip1 = await supplyChain.fetchShipment(shipmentId_1)
 
@@ -285,8 +311,8 @@ contract('SupplyChain', function(accounts) {
         it("Testing smart contract function deliver() that allows a buyer to recieve honey", async() => {
             await supplyChain.harvestItem(upc1, originBeeKeeperID1, originBeeKeeperName1, originBeeKeeperInformation1, originBeeKeeperLatitude1, originBeeKeeperLongitude1, quantity, productNotes, {from: harvesterId_1})
             await supplyChain.placeOrder(upc1, orderQuantity_1, {from : buyerId_1})
-            await supplyChain.sendQuote(orderId_1, price_1, shipperId_1, shippingCost_1, downPayment_1, {from: harvesterId_1})
-            await supplyChain.purchase(quoteId_1, {from : buyerId_1})
+            await supplyChain.sendQuote(orderId_1, price_1, shipperId_1, shippingCost_1, shippingDownPayment_1, {from: harvesterId_1})
+            await supplyChain.purchase(quoteId_1, {from : buyerId_1, value : shippingDownPayment_1})
             await supplyChain.ship(purchaseId_1, {from: shipperId_1})
             await supplyChain.deliver(shipmentId_1, {from: buyerId_1})
             const resultShip1 = await supplyChain.fetchShipment(shipmentId_1)
@@ -300,8 +326,8 @@ contract('SupplyChain', function(accounts) {
         it("Cannot Deliver what is already delivered", async() => {
             await supplyChain.harvestItem(upc1, originBeeKeeperID1, originBeeKeeperName1, originBeeKeeperInformation1, originBeeKeeperLatitude1, originBeeKeeperLongitude1, quantity, productNotes, {from: harvesterId_1})
             await supplyChain.placeOrder(upc1, orderQuantity_1, {from : buyerId_1})
-            await supplyChain.sendQuote(orderId_1, price_1, shipperId_1, shippingCost_1, downPayment_1, {from: harvesterId_1})
-            await supplyChain.purchase(quoteId_1, {from : buyerId_1})
+            await supplyChain.sendQuote(orderId_1, price_1, shipperId_1, shippingCost_1, shippingDownPayment_1, {from: harvesterId_1})
+            await supplyChain.purchase(quoteId_1, {from : buyerId_1, value : shippingDownPayment_1})
             await supplyChain.ship(purchaseId_1, {from: shipperId_1})
             await supplyChain.deliver(shipmentId_1, {from: buyerId_1})
             const resultShip1 = await supplyChain.fetchShipment(shipmentId_1)

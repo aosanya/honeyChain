@@ -39,7 +39,7 @@ contract('AccessControl', function(accounts) {
     // const orderQuantity_1 = quantity / 2
     // const price_1 = 10
     // const shippingCost_1 = 1
-    // const downPayment_1 = 2
+    // const shippingDownPayment_1 = 2
     // const purchaseId_1 = 1
     // const shipmentId_1 = 1
     // const quoteId_1 = 1
