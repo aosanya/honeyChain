@@ -260,11 +260,7 @@ contract('SupplyChain', function(accounts) {
             // console.log("Actual Gas Used " + actualGasUsed)
             //let weiGasUsed = web3.toWei(actualGasUsed, "Gwei")
             assert.equal(actualGasUsed, Number((expectedGasPrice/100000000000).toFixed(0)), "Gas difference can only stem from wrong account transfers")
-
         })
-
-
-
     })
 
     context('ship', () => {
@@ -283,6 +279,8 @@ contract('SupplyChain', function(accounts) {
             await supplyChain.placeOrder(upc1, orderQuantity_1, {from : buyerId_1})
             await supplyChain.sendQuote(orderId_1, price_1, shipperId_1, shippingCost_1, shippingDownPayment_1, {from: harvesterId_1})
             await supplyChain.purchase(quoteId_1, {from : buyerId_1, value : shippingDownPayment_1})
+
+
             await supplyChain.ship(purchaseId_1, {from: shipperId_1})
             const resultShip1 = await supplyChain.fetchShipment(shipmentId_1)
 
@@ -314,7 +312,10 @@ contract('SupplyChain', function(accounts) {
             await supplyChain.sendQuote(orderId_1, price_1, shipperId_1, shippingCost_1, shippingDownPayment_1, {from: harvesterId_1})
             await supplyChain.purchase(quoteId_1, {from : buyerId_1, value : shippingDownPayment_1})
             await supplyChain.ship(purchaseId_1, {from: shipperId_1})
-            await supplyChain.deliver(shipmentId_1, {from: buyerId_1})
+
+            let balance = price_1 + shippingCost_1 - shippingDownPayment_1;
+
+            await supplyChain.deliver(shipmentId_1, {from: buyerId_1, value : balance})
             const resultShip1 = await supplyChain.fetchShipment(shipmentId_1)
 
             assert.equal(resultShip1[0], shipmentId_1, 'Error: Invalid ShipmentId')
@@ -329,7 +330,9 @@ contract('SupplyChain', function(accounts) {
             await supplyChain.sendQuote(orderId_1, price_1, shipperId_1, shippingCost_1, shippingDownPayment_1, {from: harvesterId_1})
             await supplyChain.purchase(quoteId_1, {from : buyerId_1, value : shippingDownPayment_1})
             await supplyChain.ship(purchaseId_1, {from: shipperId_1})
-            await supplyChain.deliver(shipmentId_1, {from: buyerId_1})
+            let balance = price_1 + shippingCost_1 - shippingDownPayment_1;
+
+            await supplyChain.deliver(shipmentId_1, {from: buyerId_1, value : balance})
             const resultShip1 = await supplyChain.fetchShipment(shipmentId_1)
 
             assert.equal(resultShip1[0], shipmentId_1, 'Error: Invalid ShipmentId')
@@ -338,7 +341,7 @@ contract('SupplyChain', function(accounts) {
             assert.equal(resultShip1[4], true, 'Error: Should be Delivered')
 
             try{
-                await supplyChain.deliver(shipmentId_1, {from: buyerId_1})
+                await supplyChain.deliver(shipmentId_1, {from: buyerId_1, value : balance})
             }
             catch (error){
                 //assert.isTrue(error.toString().includes("revert ERROR_ALREADY_DELIVERED"), "Unexpected throw recieved")

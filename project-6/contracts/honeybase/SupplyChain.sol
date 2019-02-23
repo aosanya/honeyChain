@@ -334,7 +334,7 @@ contract SupplyChain is AccessControl {
     // Use the above modifiers to check if the harvest is shipped
     function deliver(uint _shipmentId) public
         shipmentExists(_shipmentId)
-        hasPermission(RECIEVER_OF_ROLE, msg.sender, bytes32(_shipmentId) ,"Missing RECIEVER_OF_ROLE")
+        hasPermission(RECIEVER_OF_ROLE, msg.sender, bytes32(_shipmentId) ,"Missing RECIEVER_OF_ROLE") payable
     {
 
         Shipment storage shipment_ = shipments[_shipmentId];
@@ -347,8 +347,20 @@ contract SupplyChain is AccessControl {
         Harvest storage harvest_ = harvests[shipment_.upc];
         Quote storage quote_ = quotes[shipment_.quoteId];
 
-        //shipment_.shipper.transfer(quote_.)
-        //starOwner.transfer(starCost);
+        //Pay shipping balance
+
+        if(quote_.shippingDownPayment > quote_.shippingCost) {
+            quote_.shipperId.transfer(quote_.shippingCost - quote_.shippingDownPayment);
+        }
+
+        harvest_.harvesterId.transfer(quote_.price);
+
+
+        uint256 balanceCost = quote_.price + quote_.shippingCost - quote_.shippingDownPayment;
+        if(msg.value > balanceCost) {
+           msg.sender.transfer(msg.value - balanceCost);
+        }
+
         emit Delivered(_shipmentId);
     }
 
