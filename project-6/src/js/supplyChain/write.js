@@ -1,22 +1,42 @@
 var SupplyChainWrite = {
 
+    createNewContract: async function(callback) {
+        App.contracts.SupplyChain.new().then(function(instance) {
+            console.log(instance)
+            console.log(instance.contract.address)
+            console.log(callback)
+            callback(instance)
+            //console.log(instance)
+            //console.log(instance.contract.address)
+            //return instance.contract.address;
+        }).catch(function(err) {
+            console.log(err.message);
+            return null;
+        });
+
+    },
+
     harvestItem: async function(event) {
         event.preventDefault();
 
+        console.log(App.harvest)
         const instance = await App.contracts.SupplyChain.at(App.contract)
-
-        const harvestItem = await instance.harvestItem(
-                                                    App.upc,
-                                                    App.metamaskAccountID,
-                                                    App.harvest.originBeekeeperName,
-                                                    App.harvest.originFarmInformation,
-                                                    App.harvest.originFarmLatitude,
-                                                    App.harvest.originFarmLongitude,
-                                                    App.harvest.harvestQuantity,
-                                                    App.harvest.productNotes
-                                                );
-
-        return harvestItem;
+        try{
+            const harvestItem = await instance.harvestItem(
+                                                        App.upc,
+                                                        App.metamaskAccountID,
+                                                        App.harvest.originBeekeeperName,
+                                                        App.harvest.originFarmInformation,
+                                                        App.harvest.originFarmLatitude,
+                                                        App.harvest.originFarmLongitude,
+                                                        App.harvest.harvestQuantity,
+                                                        App.harvest.productNotes
+                                                    );
+            return {successful: true, tx : harvestItem, message : ""}
+        }
+        catch(error){
+            return {successful: false, tx : null, message : error.toString()}
+        }
     },
 
     placeOrder: async function (event) {

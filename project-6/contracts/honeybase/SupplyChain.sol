@@ -358,7 +358,7 @@ contract SupplyChain is AccessControl {
 
         uint256 balanceCost = quote_.price + quote_.shippingCost - quote_.shippingDownPayment;
         if(msg.value > balanceCost) {
-           msg.sender.transfer(msg.value - balanceCost);
+            msg.sender.transfer(msg.value - balanceCost);
         }
 
         emit Delivered(_shipmentId);

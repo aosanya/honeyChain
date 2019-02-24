@@ -10,6 +10,7 @@ var Tabs = {
         }
 
         Tabs.showContainer("home", false);
+        Tabs.showContainer("loadContractForm", false);
         Tabs.showContainer("productSummary", false);
         Tabs.showContainer("productOverview", false);
         Tabs.showContainer("harvestForm", false);
@@ -25,6 +26,9 @@ var Tabs = {
             case "home":
                 Tabs.showContainer("home", true);
                 Tabs.showContainer("BackHome", false)
+                break;
+            case "loadContractForm":
+                Tabs.showContainer("loadContractForm", true);
                 break;
             case "productOverview":
                 Tabs.showContainer("productOverview", true);

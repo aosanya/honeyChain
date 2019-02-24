@@ -344,7 +344,7 @@ contract('SupplyChain', function(accounts) {
                 await supplyChain.deliver(shipmentId_1, {from: buyerId_1, value : balance})
             }
             catch (error){
-                //assert.isTrue(error.toString().includes("revert ERROR_ALREADY_DELIVERED"), "Unexpected throw recieved")
+                assert.isTrue(error.toString().includes("revert ERROR_ALREADY_DELIVERED"), "Unexpected throw recieved")
                 return
             }
             assert.fail('Expected throw not recieved')

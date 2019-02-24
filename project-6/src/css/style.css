@@ -37,6 +37,13 @@ button {
     margin: 4px 2px;
 }
 
+button:hover {
+  padding: 18px 32px;
+}
+
+button:focus {
+  padding: 18px 33px;
+}
 
 .sell {
   background-color: white;
@@ -215,3 +222,23 @@ li {
 .warning {
   color: #8B0000;
 }
+
+.row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.column {
+  flex-direction: column;
+  flex-basis: 100%;
+  flex: 1;
+}
+
+.blink {
+  -webkit-animation: blink 1s step-end infinite;
+          animation: blink 1s step-end infinite;
+}
+
+@-webkit-keyframes blink { 50% { visibility: hidden; }}
+@keyframes blink { 50% { visibility: hidden; }}

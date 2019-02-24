@@ -2,6 +2,15 @@
 var Display = {
     alternating : false,
 
+    showContract : function() {
+        Display.show("[name='contractControls']", true)
+        $("[name='LoadedContract']").empty();
+        $("[name='LoadedContract']").append(App.contract);
+
+    },
+
+
+
     showHarvest : function(harvest) {
         console.log(harvest)
 
