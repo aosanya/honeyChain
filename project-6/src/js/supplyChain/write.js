@@ -16,9 +16,24 @@ var SupplyChainWrite = {
 
     },
 
-    harvestItem: async function(event) {
+    addHarvester: async function(event) {
         event.preventDefault();
 
+        console.log(App.harvesterAddress)
+        const instance = await App.contracts.SupplyChain.at(App.contract)
+
+        try{
+            const HARVEST_ROLE = await instance.HARVEST_ROLE();
+            const harvestItem = await instance.addPermission(HARVEST_ROLE, App.harvesterAddress, "");
+            return {successful: true, tx : harvestItem, message : "Harvester Added Successfully"}
+        }
+        catch(error){
+            return {successful: false, tx : null, message : error.toString()}
+        }
+    },
+
+    harvestItem: async function(event) {
+        event.preventDefault();
         console.log(App.harvest)
         const instance = await App.contracts.SupplyChain.at(App.contract)
         try{
@@ -32,7 +47,7 @@ var SupplyChainWrite = {
                                                         App.harvest.harvestQuantity,
                                                         App.harvest.productNotes
                                                     );
-            return {successful: true, tx : harvestItem, message : ""}
+            return {successful: true, tx : harvestItem, message : "Harvest Posted Successfully"}
         }
         catch(error){
             return {successful: false, tx : null, message : error.toString()}

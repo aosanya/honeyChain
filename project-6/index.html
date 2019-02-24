@@ -36,6 +36,16 @@
         <div>
             Current Contract : <span name="LoadedContract">not loaded</span>
         </div>
+        <div class="loadingBar Hidden" name="loadingBar">
+            <ul>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+            </ul>
+        </div>
+        <br>
+
         <div id="ftc-harvest">
             <div class="Hidden" name="Message" id="Message">
                 <ul id="messages">
@@ -46,19 +56,24 @@
             <div name="home" id="home">
 
                 <div style="width: 50%; margin: 0 auto;text-align: center">
-                    <h3>Home</h3>
-                    <div class="row">
-                        <div class="button-div column">
-                            <button class="btn-fetchOne" style="width: 200px" id="button" type="button" data-id="createNewContract">Create New Contract</button>
-                        </div>
-                        <div class="button-div column">
-                            <button style="width: 200px" id="button" type="button" data-id="loadContractForm">Load Existing Contract</button>
+                    <div>
+                        <h3>Home</h3>
+                        <div class="row">
+                            <div class="button-div column">
+                                <button class="btn-fetchOne" style="width: 200px" id="button" type="button" data-id="createNewContract">Create New Contract</button>
+                            </div>
+                            <div class="button-div column">
+                                <button style="width: 200px" id="button" type="button" data-id="loadContractForm">Load Existing Contract</button>
+                            </div>
                         </div>
                     </div>
 
-                    <hr>
                     <div class="Hidden" name="contractControls">
+                        <hr>
                         <div class="row">
+                            <div class="button-div column">
+                                <button  style="width: 200px" id="button" type="button" data-id="loadAddHarvesterForm">Add Harvester</button>
+                            </div>
                             <div class="button-div column">
                                 <button  style="width: 200px" id="button" type="button" data-id="retrieveProduct">Retrieve Product</button>
                             </div>
@@ -89,7 +104,7 @@
                     <div class="form-group">
                         Contract Address
                         <br>
-                        <input type="text" id="contractAddress" name="contractAddress" value=0xbc74a9dd60c7f33d4c80278c1824168636bf3930><br>
+                        <input type="text" id="contractAddress" name="contractAddress" value=0xe4e12044b5bc8461eb83bb485e6da809155c244d><br>
                         <div class=button-div>
                             <button id="button" type="button" data-id="loadContract">Load Contract</button>
                         </div>
@@ -105,6 +120,20 @@
                     <div class=button-div>
                         <button id="button" type="button" data-id="fetchHarvest">Fetch Product</button>
                     </div>
+                </div>
+                <div class=form-break></div>
+            </div>
+            <div class="Hidden" name="addHarvesterForm" id="addHarvesterForm">
+                <h3>Add Harvester</h3>
+                <div class="form-group">
+                    Harvester Address
+                    <br>
+                    <input type="text" id="addHarvester_HarvesterAddress" name="addHarvester_HarvesterAddress" value=><br>
+                    <div class=button-div>
+                        <button id="button" type="button" data-id="addHarvester">Add Harverster</button>
+                    </div>
+                    <br>
+                    <div class="message success Hidden" name="addHarvesterMessage" data-category="messages"></div>
                 </div>
                 <div class=form-break></div>
             </div>
@@ -138,6 +167,8 @@
                     <br>
                     <input type="text" id="productNotes" name="productNotes" value=""><br>
                     <button id="button" type="button" data-id="harvest">Harvest</button>
+                    <br>
+                    <div class="message success Hidden" name="harvestMessage" data-category="messages"></div>
                 </div>
                 <div class=form-break></div>
             </div>

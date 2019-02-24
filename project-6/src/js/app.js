@@ -6,6 +6,8 @@ App = {
     metamaskAccountID: "0x0000000000000000000000000000000000000000",
     ownerID: "0x0000000000000000000000000000000000000000",
     upc: 0,
+
+
     harvest: {
         sku: 0,
         originBeekeeperID: "0x0000000000000000000000000000000000000000",
@@ -37,9 +39,9 @@ App = {
 
 
     productPrice: 0,
-    harvesterID: "0x0000000000000000000000000000000000000000",
-    shipperID: "0x0000000000000000000000000000000000000000",
-    buyerID: "0x0000000000000000000000000000000000000000",
+    harvesterAddress: "0x0000000000000000000000000000000000000000",
+    shipperAddress: "0x0000000000000000000000000000000000000000",
+    buyerAddress: "0x0000000000000000000000000000000000000000",
     state: "",
 
     init: async function () {
@@ -61,7 +63,7 @@ App = {
     },
 
     contractCreated: function (instance) {
-        App.contract = instance.contract.address();
+        App.contract = instance.contract.address;
         console.log(App.contract);
         App.loadContract();
     },
@@ -73,6 +75,10 @@ App = {
 
     readLoadContractForm: function () {
         App.contract = $("#contractAddress").val();
+    },
+
+    readAddHarvesterForm: function () {
+        App.harvesterAddress = $("#addHarvester_HarvesterAddress").val();
     },
 
     readHarvestForm: function () {
@@ -194,13 +200,20 @@ App = {
     },
 
     handleButtonClick: async function(event) {
-        event.preventDefault();
 
-        App.getMetaskAccountID();
+        event.preventDefault();
 
         var processId = $(event.target).data('id');
         console.log('processId',processId);
 
+        if (processId == undefined){
+            return
+        }
+
+        Display.showLoadingBar();
+        Display.removeMessages();
+
+        App.getMetaskAccountID();
         //$(event.target).addClass("blink");
         switch(processId) {
             case "createNewContract":
@@ -211,11 +224,15 @@ App = {
                 App.readLoadContractForm();
                 App.loadContract();
                 break;
+            case "addHarvester":
+                App.readAddHarvesterForm();
+                const resultAddHarvesterTx = await SupplyChainWrite.addHarvester(event);
+                Display.showTx(resultAddHarvesterTx, "addHarvesterMessage");
+                break;
             case "harvest":
                 App.readHarvestForm();
                 const resultHarvestTx = await SupplyChainWrite.harvestItem(event);
-                console.log(resultHarvestTx)
-                Display.showTx(resultHarvestTx);
+                Display.showTx(resultHarvestTx, "harvestMessage");
                 break;
             case "placeOrder":
                 App.readOrderForm();
@@ -280,14 +297,19 @@ App = {
             case "displayDeliverDetails":
                 Display.showDeliveryDetails(await SupplyChainRead.fetchHarvest(event));
                 break;
+
             case 10:
                 await App.fetchItemBufferTwo(event);
                 break;
+            //To Do Squash the next lines
             case "retrieveProduct":
                 await Tabs.showForm("productOverview");
                 break;
             case "loadContractForm":
                 await Tabs.showForm("loadContractForm");
+                break;
+            case "loadAddHarvesterForm":
+                await Tabs.showForm("loadAddHarvesterForm");
                 break;
             case "harvestForm":
                 await Tabs.showForm("harvest");
@@ -314,8 +336,7 @@ App = {
                 await Tabs.showForm("home", true);
                 break;
             }
-
-            //$(event.target).removeClass("blink");
+            Display.hideLoadingBar();
     },
 
 

@@ -11,6 +11,7 @@ var Tabs = {
 
         Tabs.showContainer("home", false);
         Tabs.showContainer("loadContractForm", false);
+        Tabs.showContainer("addHarvesterForm", false);
         Tabs.showContainer("productSummary", false);
         Tabs.showContainer("productOverview", false);
         Tabs.showContainer("harvestForm", false);
@@ -32,6 +33,9 @@ var Tabs = {
                 break;
             case "productOverview":
                 Tabs.showContainer("productOverview", true);
+                break;
+            case "loadAddHarvesterForm":
+                Tabs.showContainer("addHarvesterForm", true);
                 break;
             case "harvest":
                 Tabs.showContainer("harvestForm", true);

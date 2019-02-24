@@ -2,14 +2,29 @@
 var Display = {
     alternating : false,
 
+    showLoadingBar : function() {
+        const targetName = "[name='loadingBar']";
+        Display.show(targetName, true);
+        console.log("Loading")
+    },
+
+    hideLoadingBar : function() {
+        const targetName = "[name='loadingBar']";
+        Display.show(targetName, false);
+        console.log("Hiding")
+    },
+
+    removeMessages : function() {
+        const targetName = "[data-category='messages']";
+        $(targetName).addClass("Hidden")
+        $(targetName).empty();
+    },
+
     showContract : function() {
         Display.show("[name='contractControls']", true)
         $("[name='LoadedContract']").empty();
         $("[name='LoadedContract']").append(App.contract);
-
     },
-
-
 
     showHarvest : function(harvest) {
         console.log(harvest)
@@ -40,9 +55,19 @@ var Display = {
         return '<li>' + name + ' <div class="Info">' + value + '</div></li>'
     },
 
-    showTx : function(harvestTx) {
-        console.log(harvestTx);
-        $("#ftc-item").text(harvestTx);
+    showTx : function(tx, messageTarget) {
+        const targetName = "[name='" + messageTarget + "']";
+        console.log(targetName)
+        if (tx.successful == false){
+            console.log(tx.message)
+            Display.showWarning(targetName, tx.message)
+        }
+        else{
+            console.log(tx.message)
+            Display.showSuccess(targetName, tx.message)
+        }
+        console.log(tx);
+        $("#ftc-item").text(tx);
     },
 
     showHarvestDetails : function(harvest) {
@@ -150,5 +175,22 @@ var Display = {
             $(selector).removeClass("Hidden")
         }
     },
+
+    showSuccess: function(selector, message) {
+        Display.show(selector, true)
+        $(selector).empty();
+        $(selector).append(message);
+        $(selector).addClass("success")
+        $(selector).removeClass("warning")
+    },
+
+    showWarning: function(selector, message) {
+        Display.show(selector, true)
+        $(selector).empty();
+        $(selector).append(message);
+        $(selector).addClass("warning")
+        $(selector).removeClass("success")
+    },
+
 
 }
