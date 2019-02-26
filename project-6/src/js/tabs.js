@@ -21,6 +21,7 @@ var Tabs = {
         Tabs.showContainer("shipForm", false);
         Tabs.showContainer("deliverForm", false);
         Tabs.showContainer("transactionHistory", false);
+        Tabs.showContainer("transactionResults", false);
 
 
         switch(state) {
@@ -58,7 +59,10 @@ var Tabs = {
             case "transactionHistory":
                 Tabs.showContainer("transactionHistory", true);
                 break;
-
+            case "transactionResults":
+                Tabs.showContainer("transactionResults", true);
+                Display.clearTransactionResults();
+                break;
             default:
 
         }

@@ -107,6 +107,7 @@ contract('SupplyChain', function(accounts) {
             var event = supplyChain.Harvested({fromBlock: 0})
 
             await event.watch((err, res) => {
+                console.log(res.args.upc)
                 eventEmitted = true
             })
 
@@ -128,7 +129,7 @@ contract('SupplyChain', function(accounts) {
             assert.equal(resultHarvest[8], originBeeKeeperLongitude1, 'Error: Missing or Invalid originFarmLongitude')
             assert.equal(resultHarvest[9], quantity, 'Error: Missing or Quantity')
             assert.equal(resultBufferTwo[5], 0, 'Error: Invalid item State')
-            //assert.equal(eventEmitted, true, 'Invalid event emitted')
+            assert.equal(eventEmitted, true, 'Invalid event emitted')
         })
 
         it("Testing smart contract function harvestItem() that allows a harvester to harvest honey with upc2", async() => {
@@ -160,7 +161,7 @@ contract('SupplyChain', function(accounts) {
             assert.equal(resultHarvest[8], originBeeKeeperLongitude2, 'Error: Missing or Invalid originFarmLongitude')
             assert.equal(resultHarvest[9], quantity, 'Error: Missing or Quantity')
             assert.equal(resultBufferTwo[5], 0, 'Error: Invalid item State')
-            //assert.equal(eventEmitted, true, 'Invalid event emitted')
+            assert.equal(eventEmitted, true, 'Invalid event emitted')
         })
     })
 
@@ -206,8 +207,8 @@ contract('SupplyChain', function(accounts) {
         })
 
         it("Testing smart contract function sendQuote() that allows a harvester to sendQuote", async() => {
-            await supplyChain.harvestItem(upc1,  originBeeKeeperID1, originBeeKeeperName1, originBeeKeeperInformation1, originBeeKeeperLatitude1, originBeeKeeperLongitude1, quantity, productNotes, {from: harvesterId_1})
-            await supplyChain.placeOrder(upc1, orderQuantity_1, {from : buyerId_1})
+            await supplyChain.harvestItem(upc2,  originBeeKeeperID1, originBeeKeeperName1, originBeeKeeperInformation1, originBeeKeeperLatitude1, originBeeKeeperLongitude1, quantity, productNotes, {from: harvesterId_1})
+            await supplyChain.placeOrder(upc2, orderQuantity_1, {from : buyerId_1})
             await supplyChain.sendQuote(orderId_1, price_1, shipperId_1, shippingCost_1, shippingDownPayment_1, {from : harvesterId_1})
 
             const resultOrder1 = await supplyChain.fetchQuote(1)
@@ -218,6 +219,15 @@ contract('SupplyChain', function(accounts) {
             assert.equal(resultOrder1[4], shippingCost_1, 'Error: Invalid Shipping Cost')
             assert.equal(resultOrder1[5], shippingDownPayment_1, 'Error: Invalid Shipping Downpayment')
         })
+
+        it("Testing fetch downPayment", async() => {
+            await supplyChain.harvestItem(upc2,  originBeeKeeperID1, originBeeKeeperName1, originBeeKeeperInformation1, originBeeKeeperLatitude1, originBeeKeeperLongitude1, quantity, productNotes, {from: harvesterId_1})
+            await supplyChain.placeOrder(upc2, orderQuantity_1, {from : buyerId_1})
+            await supplyChain.sendQuote(orderId_1, price_1, shipperId_1, shippingCost_1, shippingDownPayment_1, {from: harvesterId_1})
+            const resultDownpayment1 = await supplyChain.fetchDownpayment(1)
+            assert.equal(resultDownpayment1, shippingDownPayment_1, 'Error: Invalid Downpayment')
+        })
+
     })
 
     context('purchase', () => {
@@ -231,8 +241,8 @@ contract('SupplyChain', function(accounts) {
         })
 
         it("Testing smart contract function Purchased() that allows a buyer to purchase", async() => {
-            await supplyChain.harvestItem(upc1,  originBeeKeeperID1, originBeeKeeperName1, originBeeKeeperInformation1, originBeeKeeperLatitude1, originBeeKeeperLongitude1, quantity, productNotes, {from: harvesterId_1})
-            await supplyChain.placeOrder(upc1, orderQuantity_1, {from : buyerId_1})
+            await supplyChain.harvestItem(upc2,  originBeeKeeperID1, originBeeKeeperName1, originBeeKeeperInformation1, originBeeKeeperLatitude1, originBeeKeeperLongitude1, quantity, productNotes, {from: harvesterId_1})
+            await supplyChain.placeOrder(upc2, orderQuantity_1, {from : buyerId_1})
             await supplyChain.sendQuote(orderId_1, price_1, shipperId_1, shippingCost_1, shippingDownPayment_1, {from: harvesterId_1})
             await supplyChain.purchase(quoteId_1, {from : buyerId_1, value : shippingDownPayment_1})
             const resultPurchase1 = await supplyChain.fetchPurchase(purchaseId_1)
@@ -241,8 +251,8 @@ contract('SupplyChain', function(accounts) {
         })
 
         it("Testing smart contract function Purchased() that allows a buyer to purchase", async() => {
-            await supplyChain.harvestItem(upc1,  originBeeKeeperID1, originBeeKeeperName1, originBeeKeeperInformation1, originBeeKeeperLatitude1, originBeeKeeperLongitude1, quantity, productNotes, {from: harvesterId_1})
-            await supplyChain.placeOrder(upc1, orderQuantity_1, {from : buyerId_1})
+            await supplyChain.harvestItem(upc2,  originBeeKeeperID1, originBeeKeeperName1, originBeeKeeperInformation1, originBeeKeeperLatitude1, originBeeKeeperLongitude1, quantity, productNotes, {from: harvesterId_1})
+            await supplyChain.placeOrder(upc2, orderQuantity_1, {from : buyerId_1})
             await supplyChain.sendQuote(orderId_1, price_1, shipperId_1, shippingCost_1, shippingDownPayment_1, {from: harvesterId_1})
 
             let balanceBefore = web3.eth.getBalance(buyerId_1);

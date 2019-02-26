@@ -258,10 +258,11 @@ contract SupplyChain is AccessControl {
     // Define a function 'packItem' that allows a farmer to mark an harvest 'Packed'
     function sendQuote(uint _orderId, uint _price, address _shipperId, uint _shippingCost,uint _shippingDownPayment) public
     orderExists(_orderId)
-    hasPermission(HARVESTER_OF_ROLE, msg.sender, bytes32(_orderId) ,"Missing HARVESTER_OF_ROLE")
     {
+
         require(_shippingDownPayment <= _shippingCost, ERROR_SHIPPINGDOWNPAYMENT);
         Order storage order_ = orders[_orderId];
+        require(has(HARVESTER_OF_ROLE, msg.sender, bytes32(order_.upc)) ,"Missing HARVESTER_OF_ROLE");
         Quote storage quote_ = quotes[quoteId];
         quote_.quoteId = quoteId;
         quote_.orderId = _orderId;
@@ -460,6 +461,16 @@ contract SupplyChain is AccessControl {
         shippingCost = quote_.shippingCost;
         shippingDownPayment = quote_.shippingDownPayment;
         date = quote_.date;
+    }
+
+        // Define a function 'fetchHarvest' that fetches the data
+    function fetchDownpayment(uint _quoteId) public view returns
+    (
+    uint    downPayment
+    )
+    {
+        Quote storage quote_ = quotes[_quoteId];
+        downPayment = quote_.shippingDownPayment;
     }
 
     function fetchPurchase(uint _purchaseId) public view returns

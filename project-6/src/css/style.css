@@ -211,11 +211,16 @@ li {
   border-bottom: 1px solid #dad7d7;
 }
 
+.Info {
+  word-wrap: break-word;
+}
+
 .message {
   margin: 10px 0;
   font-size: 15px;
   word-wrap: break-word;
 }
+
 .success {
   color: #228B22;
 }
@@ -245,12 +250,17 @@ li {
 @keyframes blink { 50% { visibility: hidden; }}
 
 
-/* loading Bar */
-.loadingBar{
+.fixedTopRight{
   position:fixed;
   top:0;
   right:0;
 }
+
+/* loading Bar */
+.loadingBar{
+
+}
+
 .loadingBar ul {
   margin-left: 20px;
   margin-top: 20px;

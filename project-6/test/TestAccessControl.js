@@ -100,6 +100,7 @@ contract('AccessControl', function(accounts) {
     context('Permissions', () => {
 
         it("Testing Adding New Permission", async() => {
+
             await accessControl.addPermission("Harvester", harvesterId_1, "upc1")
 
             try{

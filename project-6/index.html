@@ -35,8 +35,18 @@
     <div class="container form">
         <div>
             Current Contract : <span name="LoadedContract">not loaded</span>
+            <div>
+                <div class="loadingBar Hidden" name="contractLoadingBar">
+                    <ul>
+                        <li></li>
+                        <li></li>
+                        <li></li>
+                        <li></li>
+                    </ul>
+                </div>
+            </div>
         </div>
-        <div class="loadingBar Hidden" name="loadingBar">
+        <div class="loadingBar Hidden fixedTopRight" name="loadingBar">
             <ul>
                 <li></li>
                 <li></li>
@@ -104,7 +114,7 @@
                     <div class="form-group">
                         Contract Address
                         <br>
-                        <input type="text" id="contractAddress" name="contractAddress" value=0xe4e12044b5bc8461eb83bb485e6da809155c244d><br>
+                        <input type="text" id="contractAddress" name="contractAddress" value=0x95ecc65fd727c8787f92d7cda2ac61ff5d1ba35d><br>
                         <div class=button-div>
                             <button id="button" type="button" data-id="loadContract">Load Contract</button>
                         </div>
@@ -146,7 +156,8 @@
                     BeeKeeper ID
                     <br>
                     <input type="text" id="originBeekeeperID" name="originBeekeeperID" value="0xce5144391b4ab80668965f2cc4f2cc102380ef0a"
-                        size="50"><br>
+                        size="50">
+                    <br>
                     Farm Name
                     <br>
                     <input type="text" id="originBeekeeperName" name="originBeekeeperName" value=""><br>
@@ -169,6 +180,7 @@
                     <button id="button" type="button" data-id="harvest">Harvest</button>
                     <br>
                     <div class="message success Hidden" name="harvestMessage" data-category="messages"></div>
+
                 </div>
                 <div class=form-break></div>
             </div>
@@ -187,6 +199,8 @@
                     <br>
                     <input type="number" id="orderQuantity" name="orderQuantity" value=>Liters<br>
                     <button id="button" type="button" data-id="placeOrder">Place Order</button>
+                    <br>
+                    <div class="message success Hidden" name="placeOrderMessage" data-category="messages"></div>
                 </div>
                 <div class=form-break></div>
             </div>
@@ -204,13 +218,20 @@
                     Price
                     <br>
                     <input type="number" id="orderPrice" name="orderPrice" value=>ETH<br>
+                    Shipper ID
+                    <br>
+                    <input type="text" id="orderShipperID" name="orderShipperID" value="0xD37b7B8C62BE2fdDe8dAa9816483AeBDBd356088"
+                        size="50">
+                    <br>
                     Shipping Cost
                     <br>
                     <input type="number" id="orderShippingCost" name="orderShippingCost" value=>ETH<br>
-                    Downpayment
+                    Shipping Downpayment
                     <br>
                     <input type="number" id="orderDownpayment" name="orderDownpayment" value=>ETH<br>
                     <button id="button" type="button" data-id="sendQuote">Send Quote</button>
+                    <br>
+                    <div class="message success Hidden" name="sendQuoteMessage" data-category="messages"></div>
                 </div>
                 <div class=form-break></div>
             </div>
@@ -226,6 +247,8 @@
                     </div>
                     <br>
                     <button id="button" type="button" data-id="purchase">Purchase</button>
+                    <br>
+                    <div class="message success Hidden" name="purchaseMessage" data-category="messages"></div>
                 </div>
                 <div class=form-break></div>
             </div>
@@ -241,6 +264,8 @@
                     </div>
                     <br>
                     <button class="btn-ship" id="button" type="button" data-id="ship">Ship</button>
+                    <br>
+                    <div class="message success Hidden" name="shipMessage" data-category="messages"></div>
                 </div>
                 <div class=form-break></div>
             </div>
@@ -261,6 +286,17 @@
                 </div>
                 <div class=form-break></div>
             </div>
+            <div class="Hidden" id="transactionResults" name="transactionResults">
+                    <h3>Transaction Results</h3>
+                    <div>
+                        <ul id="transactionResultsList">
+
+                        </ul>
+                    </div>
+                    <div class=button-div>
+                        <button id="button" type="button" data-id="backHome">Back Home</button>
+                    </div>
+                </div>
         </div>
         <div class="form Hidden" id="productSummary" name="productSummary">
             <h3>Product Summary</h3>
@@ -271,6 +307,8 @@
             </div>
         </div>
     </div>
+
+
 
     <div class="form Hidden" id="transactionHistory" name="transactionHistory">
         <h3>Transaction History<span id="ftc-history"></span></h3>

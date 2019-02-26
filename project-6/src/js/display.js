@@ -1,17 +1,24 @@
 
 var Display = {
     alternating : false,
+    loading : 0,
 
     showLoadingBar : function() {
+        Display.loading += 1;
+        if (Display.loading > 1){
+            return
+        }
         const targetName = "[name='loadingBar']";
         Display.show(targetName, true);
-        console.log("Loading")
-    },
+     },
 
     hideLoadingBar : function() {
+        Display.loading -= 1;
+        if (Display.loading > 0){
+            return
+        }
         const targetName = "[name='loadingBar']";
         Display.show(targetName, false);
-        console.log("Hiding")
     },
 
     removeMessages : function() {
@@ -20,10 +27,18 @@ var Display = {
         $(targetName).empty();
     },
 
-    showContract : function() {
-        Display.show("[name='contractControls']", true)
+    showContract : function(visible) {
+        Display.show("[name='contractControls']", visible)
+    },
+
+    showLoadedContract : function() {
         $("[name='LoadedContract']").empty();
-        $("[name='LoadedContract']").append(App.contract);
+        if (App.contract != null){
+            $("[name='LoadedContract']").append(App.contract);
+        }
+        else{
+            $("[name='LoadedContract']").append('not loaded');
+        }
     },
 
     showHarvest : function(harvest) {
@@ -57,14 +72,14 @@ var Display = {
 
     showTx : function(tx, messageTarget) {
         const targetName = "[name='" + messageTarget + "']";
-        console.log(targetName)
+        console.log(tx)
         if (tx.successful == false){
             console.log(tx.message)
-            Display.showWarning(targetName, tx.message)
+            Display.addTransactionResults("", tx.message, false)
         }
         else{
             console.log(tx.message)
-            Display.showSuccess(targetName, tx.message)
+            Display.addTransactionResults("", tx.message, true)
         }
         console.log(tx);
         $("#ftc-item").text(tx);
@@ -155,6 +170,16 @@ var Display = {
         $(targetName).append(Display.formatDetailSummary("Date Delivered", new Date( delivery[5] *1000).toUTCString()));
 
 
+    },
+
+    clearTransactionResults : function(){
+        $("#transactionResultsList").empty();
+    },
+
+    addTransactionResults : function(name, value, successful){
+        console.log(successful)
+        const styling = successful == true ? "success" : "warning";
+        $("#transactionResultsList").append('<li class=' + styling + '>' + name + ' <span class="Info">' + value + '</span></li>');
     },
 
     formatDetailSummary : function(name, value) {

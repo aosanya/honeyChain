@@ -24,6 +24,7 @@ App = {
     quote :{
         orderId : 0,
         price: 0,
+        shipperId: "0x0000000000000000000000000000000000000000",
         shippingCost : 0,
         downpayment : 0,
     },
@@ -51,7 +52,9 @@ App = {
 
     createNewContract: async function () {
         console.log("Creating New Contract");
-
+        App.contract = null;
+        Display.showLoadedContract();
+        Display.showContract(false);
         SupplyChainWrite.createNewContract(App.contractCreated)//.then(function(data) {
         //     console.log(data)
         //     App.contract = data;
@@ -68,9 +71,9 @@ App = {
         App.loadContract();
     },
 
-    loadContract: function () {
-        App.fetchEvents();
-        Display.showContract();
+    loadContract: async function () {
+        Display.showLoadedContract();
+        App.fetchEvents(Display.showContract);
     },
 
     readLoadContractForm: function () {
@@ -102,6 +105,7 @@ App = {
     readQuoteForm: function () {
         App.quote.orderId = $("#orderId").val();
         App.quote.price = $("#orderPrice").val();
+        App.quote.shipperId = $("#orderShipperID").val();
         App.quote.shippingCost = $("#orderShippingCost").val();
         App.quote.downpayment = $("#orderDownpayment").val();
     },
@@ -225,39 +229,46 @@ App = {
                 App.loadContract();
                 break;
             case "addHarvester":
+                Tabs.showForm("transactionResults")
                 App.readAddHarvesterForm();
                 const resultAddHarvesterTx = await SupplyChainWrite.addHarvester(event);
                 Display.showTx(resultAddHarvesterTx, "addHarvesterMessage");
                 break;
             case "harvest":
+                Tabs.showForm("transactionResults")
                 App.readHarvestForm();
                 const resultHarvestTx = await SupplyChainWrite.harvestItem(event);
                 Display.showTx(resultHarvestTx, "harvestMessage");
                 break;
             case "placeOrder":
+                Tabs.showForm("transactionResults")
                 App.readOrderForm();
                 const resultOrderTx = await SupplyChainWrite.placeOrder(event);
-                Display.showTx(resultOrderTx);
+                Display.showTx(resultOrderTx, "placeOrderMessage");
                 break;
             case "sendQuote":
+                Tabs.showForm("transactionResults")
                 App.readQuoteForm();
                 const resultQuoteTx = await SupplyChainWrite.sendQuote(event);
-                Display.showTx(resultQuoteTx);
+                Display.showTx(resultQuoteTx, "sendQuoteMessage");
                 break;
             case "purchase":
+                Tabs.showForm("transactionResults")
                 App.readPurchaseForm();
                 const resultPurchaseTx = await SupplyChainWrite.purchase(event);
-                Display.showTx(resultPurchaseTx);
+                Display.showTx(resultPurchaseTx, "purchaseMessage");
                 break;
             case "ship":
+                Tabs.showForm("transactionResults")
                 App.readShipForm();
                 const resultShipTx = await SupplyChainWrite.ship(event);
-                Display.showTx(resultShipTx);
+                Display.showTx(resultShipTx, "shipMessage");
                 break;
             case "deliver":
+                Tabs.showForm("transactionResults")
                 App.readDeliverForm();
                 const resultDeliverTx = await SupplyChainWrite.deliver(event);
-                Display.showTx(resultDeliverTx);
+                Display.showTx(resultDeliverTx, "deliverMessage");
                 break;
             case "fetchHarvest":
                 App.readHarvestForm();
@@ -306,6 +317,7 @@ App = {
                 await Tabs.showForm("productOverview");
                 break;
             case "loadContractForm":
+                Display.showContract(false);
                 await Tabs.showForm("loadContractForm");
                 break;
             case "loadAddHarvesterForm":
@@ -380,7 +392,8 @@ App = {
 
     },
 
-    fetchEvents: function () {
+    fetchEvents: async function (callBack) {
+
         if (App.contract == null){
             return
         }
@@ -393,14 +406,18 @@ App = {
             );
             };
         }
-
+        Display.showLoadingBar();
         App.contracts.SupplyChain.at(App.contract).then(function(instance) {
-        var events = instance.allEvents(function(err, log){
-        if (!err)
-            $("#ftc-events").append('<li>' + log.event + ' - ' + log.transactionHash + '</li>');
-        });
+            var events = instance.allEvents(function(err, log){
+            if (!err)
+                $("#ftc-events").append('<li>' + log.event + ' - ' + log.transactionHash + '</li>');
+            });
+            if (callBack != undefined){
+                callBack(true);
+                Display.hideLoadingBar();
+            }
         }).catch(function(err) {
-        console.log(err.message);
+            console.log(err.message);
         });
 
     }
