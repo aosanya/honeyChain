@@ -55,6 +55,8 @@ contract SupplyChain is AccessControl {
     // that track its journey through the supply chain -- to be sent from DApp.
     mapping (uint => string[]) harvestsHistory;
 
+
+    string private constant ERROR_NOT_CONTRACT_OWNER = "ERROR_NOT_CONTRACT_OWNER";
     string private constant ERROR_HARVEST_DOES_NOT_EXIST = "ERROR_HARVEST_DOES_NOT_EXIST";
     string private constant ERROR_HARVEST_ALREADY_EXISTS = "ERROR_HARVEST_ALREADY_EXISTS";
     string private constant ERROR_ORDER_DOES_NOT_EXIST = "ERROR_ORDER_DOES_NOT_EXIST";
@@ -144,7 +146,7 @@ contract SupplyChain is AccessControl {
 
     // Define a modifer that checks to see if msg.sender == owner of the contract
     modifier onlyOwner() {
-        require(msg.sender == owner);
+        require(msg.sender == owner, ERROR_NOT_CONTRACT_OWNER);
         _;
     }
 
@@ -210,6 +212,12 @@ contract SupplyChain is AccessControl {
         if (msg.sender == owner) {
           selfdestruct(owner);
         }
+    }
+
+    function addHarvester(address _who)
+        public
+        onlyOwner{
+        addPermission(HARVEST_ROLE, _who, "");
     }
 
     // Define a function 'harvestItem' that allows a farmer to mark an harvest 'Harvested'
@@ -311,6 +319,7 @@ contract SupplyChain is AccessControl {
       purchaseExists(_purchaseId)
       hasPermission(SHIPPER_OF_ROLE, msg.sender, bytes32(_purchaseId) ,"Missing SHIPPER_OF_ROLE")
     {
+
         Purchase storage purchase_ = purchases[_purchaseId];
         Shipment storage shipment_ = shipments[shipmentId];
         shipment_.shipmentId = shipmentId;
@@ -319,7 +328,6 @@ contract SupplyChain is AccessControl {
         shipment_.orderId = purchase_.orderId;
         shipment_.upc = purchase_.upc;
         shipment_.shipper = msg.sender;
-        shipment_.purchaseId = _purchaseId;
         shipment_.date = now;
         shipmentIds[shipmentId] = true;
 
@@ -396,35 +404,6 @@ contract SupplyChain is AccessControl {
         quantity = harvest_.quantity;
     }
 
-    // Define a function 'fetchItemBufferTwo' that fetches the data
-    function fetchItemBufferTwo(uint _upc) public view returns
-    (
-    uint    harvestSKU,
-    uint    harvestUPC,
-    uint    productID,
-    string  productNotes,
-    uint    productPrice,
-    uint    harvestState,
-    address harvesterID,
-    address shipperID,
-    address buyerID
-    )
-    {
-      // Assign values to the 9 parameters
-        return
-        (
-        harvestSKU,
-        harvestUPC,
-        productID,
-        productNotes,
-        productPrice,
-        harvestState,
-        harvesterID,
-        shipperID,
-        buyerID
-        );
-    }
-
     // Define a function 'fetchHarvest' that fetches the data
     function fetchOrder(uint _orderId) public view returns
     (
@@ -463,7 +442,6 @@ contract SupplyChain is AccessControl {
         date = quote_.date;
     }
 
-        // Define a function 'fetchHarvest' that fetches the data
     function fetchDownpayment(uint _quoteId) public view returns
     (
     uint    downPayment
@@ -471,6 +449,15 @@ contract SupplyChain is AccessControl {
     {
         Quote storage quote_ = quotes[_quoteId];
         downPayment = quote_.shippingDownPayment;
+    }
+
+    function fetchDeliveryBalance(uint _quoteId) public view returns
+    (
+    uint    balance
+    )
+    {
+        Quote storage quote_ = quotes[_quoteId];
+        balance = quote_.price + quote_.shippingCost - quote_.shippingDownPayment;
     }
 
     function fetchPurchase(uint _purchaseId) public view returns
@@ -486,11 +473,14 @@ contract SupplyChain is AccessControl {
         date = purchase_.date;
     }
 
-    function fetchShipment(uint _shipmentId) public view returns
+    function fetchShipment(uint _shipmentId) public view shipmentExists(_shipmentId) returns
     (
     uint    shipmentId,
     address shipper,
     uint    purchaseId,
+    uint    quoteId,
+    uint    orderId,
+    uint    upc,
     uint    date,
     bool    delivered,
     uint    dateDelivered
@@ -500,6 +490,9 @@ contract SupplyChain is AccessControl {
         shipmentId = shipment_.shipmentId;
         shipper = shipment_.shipper;
         purchaseId = shipment_.purchaseId;
+        quoteId = shipment_.quoteId;
+        orderId = shipment_.orderId;
+        upc = shipment_.upc;
         date = shipment_.date;
         delivered = shipment_.delivered;
         dateDelivered = shipment_.dateDelivered;

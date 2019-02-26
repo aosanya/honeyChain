@@ -23,8 +23,7 @@ var SupplyChainWrite = {
         const instance = await App.contracts.SupplyChain.at(App.contract)
 
         try{
-            const HARVEST_ROLE = await instance.HARVEST_ROLE();
-            const harvestItem = await instance.addPermission(HARVEST_ROLE, App.harvesterAddress, "");
+            const harvestItem = await instance.addHarvester(App.harvesterAddress);
             return {successful: true, tx : harvestItem, message : "Harvester Added Successfully"}
         }
         catch(error){
@@ -178,8 +177,13 @@ var SupplyChainWrite = {
         })
 
         try{
+            const shipment = await SupplyChainRead.fetchShipment()
+            const resultDeliveryBalance = await instance.fetchDeliveryBalance(shipment.quoteId)
+            console.log(shipment)
+            console.log(resultDeliveryBalance)
+
             const delivery = await instance.deliver(
-                App.deliver.shippingId
+                App.deliver.shippingId, {value : resultDeliveryBalance}
             );
             return {successful: true, tx : delivery, message : "Delivery Successfully"}
         }

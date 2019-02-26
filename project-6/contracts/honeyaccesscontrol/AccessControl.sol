@@ -13,13 +13,13 @@ contract AccessControl{
         return keccak256(abi.encodePacked("PERMISSION", _who, _role, _for));
     }
 
-    function addRole(bytes32 _role) public {
+    function addRole(bytes32 _role) internal {
         bytes32 thisRoleHash = roleHash(_role);
         require(roles[thisRoleHash] == false, "Role Already Exists");
         roles[thisRoleHash] = true;
     }
 
-    function addPermission(bytes32 _role, address _who, bytes32 _for) public {
+    function addPermission(bytes32 _role, address _who, bytes32 _for) internal {
         bytes32 thisRoleHash = roleHash(_role);
         require(roles[thisRoleHash] == true, "Role Does Not Exists");
         bytes32 thisPermissionHash = permissionHash(_who, _role, _for);

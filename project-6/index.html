@@ -114,7 +114,7 @@
                     <div class="form-group">
                         Contract Address
                         <br>
-                        <input type="text" id="contractAddress" name="contractAddress" value=0x95ecc65fd727c8787f92d7cda2ac61ff5d1ba35d><br>
+                        <input type="text" id="contractAddress" name="contractAddress" value=0xdabdf31eb842269a089bf05749ee86ef1fed9e52><br>
                         <div class=button-div>
                             <button id="button" type="button" data-id="loadContract">Load Contract</button>
                         </div>
@@ -126,9 +126,10 @@
                 <div class="form-group">
                     UPC
                     <br>
-                    <input type="number" id="upc" name="upc" value=1><br>
-                    <div class=button-div>
-                        <button id="button" type="button" data-id="fetchHarvest">Fetch Product</button>
+                    <input type="number" id="productOverviewUpc" name="productOverviewUpc" value=>
+                    <span class="btn-Info glyphicon glyphicon-zoom-in" data-id="displayProductOverview"></span>
+                    <div class="details Hidden" name="HarvestDetails">
+
                     </div>
                 </div>
                 <div class=form-break></div>
@@ -280,23 +281,23 @@
 
                     </div>
                     <br>
-                    <button class="btn-deliver Hidden" id="button" name="deliverButton" type="button" data-id="deliver">Delivered</button>
+                    <button class="btn-deliver" id="button" name="deliverButton" type="button" data-id="deliver">Delivered</button>
                     <br>
                     <div class="message success Hidden" name="deliverMessage"></div>
                 </div>
                 <div class=form-break></div>
             </div>
             <div class="Hidden" id="transactionResults" name="transactionResults">
-                    <h3>Transaction Results</h3>
-                    <div>
-                        <ul id="transactionResultsList">
+                <h3>Transaction Results</h3>
+                <div>
+                    <ul id="transactionResultsList">
 
-                        </ul>
-                    </div>
-                    <div class=button-div>
-                        <button id="button" type="button" data-id="backHome">Back Home</button>
-                    </div>
+                    </ul>
                 </div>
+                <div class=button-div>
+                    <button id="button" type="button" data-id="backHome">Back Home</button>
+                </div>
+            </div>
         </div>
         <div class="form Hidden" id="productSummary" name="productSummary">
             <h3>Product Summary</h3>

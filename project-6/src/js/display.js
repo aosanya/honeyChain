@@ -144,16 +144,19 @@ var Display = {
         $(targetName).removeClass("Hidden")
         $(targetName).empty();
         $(targetName).append("<div class='header'>Shipping Details</div>");
-        $(targetName).append(Display.formatDetailSummary("Shipment Id", shipping[0]));
-        $(targetName).append(Display.formatDetailSummary("Shipper Id", shipping[1]));
-        $(targetName).append(Display.formatDetailSummary("Date Shipped", new Date(shipping[3] * 1000).toUTCString()));
-        $(targetName).append(Display.formatDetailSummary("Delivered", shipping[4]));
-        $(targetName).append(Display.formatDetailSummary("Date Delivered", new Date(shipping[5] * 1000).toUTCString()));
-        $(targetName).append(Display.formatDetailSummary("Purchase Id", shipping[2] + '<span class="btn-SubInfo glyphicon glyphicon-zoom-in" data-id="displayPurchaseDetails"></span>'));
+        $(targetName).append(Display.formatDetailSummary("Shipment Id", shipping.shipmentId));
+        $(targetName).append(Display.formatDetailSummary("Shipper Id", shipping.shipper));
+        $(targetName).append(Display.formatDetailSummary("Date Shipped", new Date(shipping.date * 1000).toUTCString()));
+        $(targetName).append(Display.formatDetailSummary("Delivered", shipping.delivered));
+        if (shipping.delivered == true){
+            $(targetName).append(Display.formatDetailSummary("Date Delivered", new Date(shipping.dateDelivered * 1000).toUTCString()));
+        }
+        $(targetName).append(Display.formatDetailSummary("Purchase Id", shipping.purchaseId + '<span class="btn-SubInfo glyphicon glyphicon-zoom-in" data-id="displayPurchaseDetails"></span>'));
         $(targetName).append(Display.addDetails("PurchaseDetails"));
 
-        Display.show("[name='deliverButton']", !shipping[4])
-        Display.show("[name='deliverMessage']", shipping[4])
+        Display.show("[name='deliverButton']", !shipping.delivered)
+        Display.show("[name='deliverMessage']", shipping.delivered)
+        $("[name='deliverMessage']").empty()
         $("[name='deliverMessage']").append("Already Delivered!")
     },
 

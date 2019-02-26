@@ -84,6 +84,10 @@ App = {
         App.harvesterAddress = $("#addHarvester_HarvesterAddress").val();
     },
 
+    readProductOverviewForm: function () {
+        App.upc = $("#productOverviewUpc").val();
+    },
+
     readHarvestForm: function () {
         App.harvest.sku = 0;
         App.upc = $("#harvestUpc").val();
@@ -120,6 +124,10 @@ App = {
 
     readDeliverForm: function () {
         App.deliver.shippingId = $("#deliverShippingId").val();
+    },
+
+    assignDeliveryDetails: function (shipping){
+        $("#shipPurchaseId").val(shipping[2]);
     },
 
     assignShippingDetails: function (shipping){
@@ -276,6 +284,11 @@ App = {
                 Tabs.showContainer("productSummary", true)
                 Display.showHarvest(result);
                 break;
+            case "displayProductOverview":
+                App.readProductOverviewForm()
+                const product = await SupplyChainRead.fetchHarvest(event)
+                Display.showHarvestDetails(product);
+                break;
             case "displayHarvestDetails":
                 App.readOrderForm()
                 const harvest = await SupplyChainRead.fetchHarvest(event)
@@ -306,7 +319,10 @@ App = {
                 Display.showShippingDetails(shipping);
                 break;
             case "displayDeliverDetails":
-                Display.showDeliveryDetails(await SupplyChainRead.fetchHarvest(event));
+                App.readDeliverForm()
+                Display.showDeliveryDetails(await SupplyChainRead.fetchShipment(event));
+                App.assignShippingDetails(shipping);
+                Display.showShippingDetails(shipping);
                 break;
 
             case 10:

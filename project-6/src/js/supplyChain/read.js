@@ -26,7 +26,6 @@ var SupplyChainRead = {
         console.log('Purchase Id', App.ship.purchaseId);
         const instance = await App.contracts.SupplyChain.at(App.contract)
         const purchase = await instance.fetchPurchase(App.ship.purchaseId)
-
         return purchase
     },
 
@@ -34,7 +33,16 @@ var SupplyChainRead = {
         console.log('Shipping Id', App.deliver.shippingId);
         const instance = await App.contracts.SupplyChain.at(App.contract)
         const shipment = await instance.fetchShipment(App.deliver.shippingId)
-        return shipment
-    },
-
+        // console.log(shipment)
+        return {shipmentId : shipment[0],
+            shipper : shipment[1],
+            purchaseId : shipment[2],
+            quoteId : shipment[3],
+            orderId : shipment[4],
+            upc : shipment[5],
+            date : shipment[6],
+            delivered : shipment[7],
+            dateDelivered : shipment[8]
+        }
+    }
 }
