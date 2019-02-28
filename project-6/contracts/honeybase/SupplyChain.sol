@@ -8,12 +8,7 @@ contract SupplyChain is AccessControl {
     address owner;
 
     //bytes32 public constant OWNER_ROLE = keccak256("OWNER_ROLE");
-    bytes32 public constant HARVEST_ROLE = keccak256("HARVEST_ROLE");
-    bytes32 public constant HARVESTER_OF_ROLE = keccak256("HARVEST_OF_ROLE");
-    bytes32 public constant ORDER_OF_ROLE = keccak256("ORDER_OF_ROLE");
-    bytes32 public constant BUYER_OF_ROLE = keccak256("BUYER_OF_ROLE");
-    bytes32 public constant SHIPPER_OF_ROLE = keccak256("SHIPPER_OF_ROLE");
-    bytes32 public constant RECIEVER_OF_ROLE = keccak256("RECIEVER_OF_ROLE");
+
 
     //bytes32 public constant SHIPPER_ROLE = keccak256("SHIPPER_ROLE");
 
@@ -150,6 +145,7 @@ contract SupplyChain is AccessControl {
         _;
     }
 
+
     // Define a modifer that verifies the Caller
     modifier verifyCaller (address _address) {
         require(msg.sender == _address);
@@ -199,12 +195,6 @@ contract SupplyChain is AccessControl {
         quoteId = 1;
         purchaseId = 1;
         shipmentId = 1;
-        addRole(HARVEST_ROLE);
-        addRole(HARVESTER_OF_ROLE);
-        addRole(ORDER_OF_ROLE);
-        addRole(BUYER_OF_ROLE);
-        addRole(SHIPPER_OF_ROLE);
-        addRole(RECIEVER_OF_ROLE);
     }
 
     // Define a function 'kill' if required
@@ -222,7 +212,7 @@ contract SupplyChain is AccessControl {
 
     // Define a function 'harvestItem' that allows a farmer to mark an harvest 'Harvested'
     function harvestItem(uint _upc, address _originBeekeeperID, string _originBeekeeperName, string _originFarmInformation, string  _originFarmLatitude, string  _originFarmLongitude, uint _quantity, string  _productNotes) public
-    hasPermission(HARVEST_ROLE, msg.sender, "", "Missing Harvester Role")
+    onlyHarvester()
     {
         require(harvestUPCs[_upc] == false, ERROR_HARVEST_ALREADY_EXISTS);
         // Add the new harvest as part of Harvest
@@ -247,7 +237,6 @@ contract SupplyChain is AccessControl {
     function placeOrder(uint _upc, uint quantity) public
     harvestExists(_upc)
     // Anybody can Place an Order
-
     {
         Harvest storage harvest_ = harvests[_upc];
         Order storage order_ = orders[orderId];
@@ -265,6 +254,7 @@ contract SupplyChain is AccessControl {
 
     // Define a function 'packItem' that allows a farmer to mark an harvest 'Packed'
     function sendQuote(uint _orderId, uint _price, address _shipperId, uint _shippingCost,uint _shippingDownPayment) public
+    onlyHarvester()
     orderExists(_orderId)
     {
 
@@ -282,6 +272,7 @@ contract SupplyChain is AccessControl {
         quote_.date = now;
         quoteIds[quoteId] = true;
 
+        addPermission(BUYER_ROLE, order_.buyerId, "");
         addPermission(BUYER_OF_ROLE, order_.buyerId, bytes32(quote_.quoteId));
 
         emit SentQuote(quoteId);
@@ -291,6 +282,7 @@ contract SupplyChain is AccessControl {
     // Define a function 'sellItem' that allows a farmer to mark an harvest 'ForSale'
     function purchase(uint _quoteId) public
     quoteExists(_quoteId)
+    onlyBuyer()
     hasPermission(BUYER_OF_ROLE, msg.sender, bytes32(_quoteId) ,"Missing BUYER_OF_ROLE") payable
     {
         Quote storage quote_ = quotes[_quoteId];
@@ -307,6 +299,7 @@ contract SupplyChain is AccessControl {
             msg.sender.transfer(msg.value - quote_.shippingDownPayment);
         }
 
+        addPermission(SHIPPER_ROLE, quote_.shipperId, "");
         addPermission(SHIPPER_OF_ROLE, quote_.shipperId, bytes32(purchase_.purchaseId));
 
         emit Purchased(purchaseId);
@@ -317,6 +310,7 @@ contract SupplyChain is AccessControl {
     // Use the above modifers to check if the harvest is sold
     function ship(uint _purchaseId) public
       purchaseExists(_purchaseId)
+      onlyShipper()
       hasPermission(SHIPPER_OF_ROLE, msg.sender, bytes32(_purchaseId) ,"Missing SHIPPER_OF_ROLE")
     {
 
@@ -343,6 +337,7 @@ contract SupplyChain is AccessControl {
     // Use the above modifiers to check if the harvest is shipped
     function deliver(uint _shipmentId) public
         shipmentExists(_shipmentId)
+        onlyBuyer()
         hasPermission(RECIEVER_OF_ROLE, msg.sender, bytes32(_shipmentId) ,"Missing RECIEVER_OF_ROLE") payable
     {
 

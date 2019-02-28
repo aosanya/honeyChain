@@ -5,6 +5,49 @@ contract AccessControl{
     mapping (bytes32 => bool) internal roles;
     mapping (bytes32 => bool) internal permissions;
 
+    bytes32 public constant HARVEST_ROLE = keccak256("HARVEST_ROLE");
+    bytes32 public constant BUYER_ROLE = keccak256("BUYER_ROLE");
+    bytes32 public constant SHIPPER_ROLE = keccak256("SHIPPER_ROLE");
+    bytes32 public constant BEEKEEPER_ROLE = keccak256("BEEKEEPER_ROLE");
+    bytes32 public constant HARVESTER_OF_ROLE = keccak256("HARVEST_OF_ROLE");
+    bytes32 public constant ORDER_OF_ROLE = keccak256("ORDER_OF_ROLE");
+    bytes32 public constant BUYER_OF_ROLE = keccak256("BUYER_OF_ROLE");
+    bytes32 public constant SHIPPER_OF_ROLE = keccak256("SHIPPER_OF_ROLE");
+    bytes32 public constant RECIEVER_OF_ROLE = keccak256("RECIEVER_OF_ROLE");
+
+    modifier onlyHarvester() {
+        require(has(HARVEST_ROLE, msg.sender, ""), "Missing Harvester Role");
+        _;
+    }
+
+    modifier onlyBuyer() {
+        require(has(BUYER_ROLE, msg.sender, ""), "Missing Buyer Role");
+        _;
+    }
+
+    modifier onlyShipper() {
+        require(has(SHIPPER_ROLE, msg.sender, ""), "Missing Shipper Role");
+        _;
+    }
+
+    modifier onlyBeekeeper() {
+        require(has(BEEKEEPER_ROLE, msg.sender, ""), "Missing Beekeeper Role");
+        _;
+    }
+
+    constructor() public {
+        addRole(HARVEST_ROLE);
+        addRole(BUYER_ROLE);
+        addRole(SHIPPER_ROLE);
+        addRole(BEEKEEPER_ROLE);
+
+        addRole(HARVESTER_OF_ROLE);
+        addRole(ORDER_OF_ROLE);
+        addRole(BUYER_OF_ROLE);
+        addRole(SHIPPER_OF_ROLE);
+        addRole(RECIEVER_OF_ROLE);
+    }
+
     function roleHash(bytes32 _role) internal pure returns (bytes32) {
         return keccak256(abi.encodePacked("ROLE", _role));
     }
