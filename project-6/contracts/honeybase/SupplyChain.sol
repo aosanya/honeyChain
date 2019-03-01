@@ -16,15 +16,15 @@ contract SupplyChain is AccessControl {
     // uint  upc;
 
     // Define a variable called 'sku' for Stock Keeping Unit (SKU)
-    uint  sku;
+    uint sku;
 
-    uint  orderId;
+    uint orderIdIndex;
 
-    uint quoteId;
+    uint quoteIdIndex;
 
-    uint purchaseId;
+    uint purchaseIdIndex;
 
-    uint shipmentId;
+    uint shipmentIdIndex;
 
     // Define a public mapping 'harvests' that maps the UPC to a Harvest.
     mapping (uint => Harvest) harvests;
@@ -191,10 +191,10 @@ contract SupplyChain is AccessControl {
     constructor() public payable {
         owner = msg.sender;
         sku = 1;
-        orderId = 1;
-        quoteId = 1;
-        purchaseId = 1;
-        shipmentId = 1;
+        orderIdIndex = 1;
+        quoteIdIndex = 1;
+        purchaseIdIndex = 1;
+        shipmentIdIndex = 1;
     }
 
     // Define a function 'kill' if required
@@ -238,18 +238,17 @@ contract SupplyChain is AccessControl {
     harvestExists(_upc)
     // Anybody can Place an Order
     {
-        Harvest storage harvest_ = harvests[_upc];
-        Order storage order_ = orders[orderId];
-        order_.orderId = orderId;
+        Order storage order_ = orders[orderIdIndex];
+        order_.orderId = orderIdIndex;
         order_.buyerId = msg.sender;
         order_.upc = _upc;
         order_.quantity = quantity;
-        orderIds[orderId] = true;
-        addPermission(ORDER_OF_ROLE, msg.sender, bytes32(orderId));
+        orderIds[orderIdIndex] = true;
+        addPermission(ORDER_OF_ROLE, msg.sender, bytes32(orderIdIndex));
 
-        emit PlacedOrder(orderId, quantity);
+        emit PlacedOrder(orderIdIndex, quantity);
 
-        orderId = orderId + 1;
+        orderIdIndex = orderIdIndex + 1;
     }
 
     // Define a function 'packItem' that allows a farmer to mark an harvest 'Packed'
@@ -260,9 +259,9 @@ contract SupplyChain is AccessControl {
 
         require(_shippingDownPayment <= _shippingCost, ERROR_SHIPPINGDOWNPAYMENT);
         Order storage order_ = orders[_orderId];
-        require(has(HARVESTER_OF_ROLE, msg.sender, bytes32(order_.upc)) ,"Missing HARVESTER_OF_ROLE");
-        Quote storage quote_ = quotes[quoteId];
-        quote_.quoteId = quoteId;
+        require(has(HARVESTER_OF_ROLE, msg.sender, bytes32(order_.upc)), "Missing HARVESTER_OF_ROLE");
+        Quote storage quote_ = quotes[quoteIdIndex];
+        quote_.quoteId = quoteIdIndex;
         quote_.orderId = _orderId;
         quote_.upc = order_.upc;
         quote_.price = _price;
@@ -270,13 +269,13 @@ contract SupplyChain is AccessControl {
         quote_.shippingCost = _shippingCost;
         quote_.shippingDownPayment = _shippingDownPayment;
         quote_.date = now;
-        quoteIds[quoteId] = true;
+        quoteIds[quoteIdIndex] = true;
 
         addPermission(BUYER_ROLE, order_.buyerId, "");
         addPermission(BUYER_OF_ROLE, order_.buyerId, bytes32(quote_.quoteId));
 
-        emit SentQuote(quoteId);
-        quoteId = quoteId + 1;
+        emit SentQuote(quoteIdIndex);
+        quoteIdIndex = quoteIdIndex + 1;
     }
 
     // Define a function 'sellItem' that allows a farmer to mark an harvest 'ForSale'
@@ -286,13 +285,13 @@ contract SupplyChain is AccessControl {
     hasPermission(BUYER_OF_ROLE, msg.sender, bytes32(_quoteId) ,"Missing BUYER_OF_ROLE") payable
     {
         Quote storage quote_ = quotes[_quoteId];
-        Purchase storage purchase_ = purchases[purchaseId];
+        Purchase storage purchase_ = purchases[purchaseIdIndex];
         purchase_.quoteId = _quoteId;
-        purchase_.purchaseId = purchaseId;
+        purchase_.purchaseId = purchaseIdIndex;
         purchase_.orderId = quote_.orderId;
         purchase_.upc = quote_.upc;
         purchase_.date = now;
-        purchaseIds[purchaseId] = true;
+        purchaseIds[purchaseIdIndex] = true;
 
         quote_.shipperId.transfer(quote_.shippingDownPayment);
         if(msg.value > quote_.shippingDownPayment) {
@@ -302,8 +301,8 @@ contract SupplyChain is AccessControl {
         addPermission(SHIPPER_ROLE, quote_.shipperId, "");
         addPermission(SHIPPER_OF_ROLE, quote_.shipperId, bytes32(purchase_.purchaseId));
 
-        emit Purchased(purchaseId);
-        purchaseId = purchaseId + 1;
+        emit Purchased(purchaseIdIndex);
+        purchaseIdIndex = purchaseIdIndex + 1;
     }
 
     // Define a function 'ship' that allows the harvester to mark an harvest 'Shipped'
@@ -315,21 +314,21 @@ contract SupplyChain is AccessControl {
     {
 
         Purchase storage purchase_ = purchases[_purchaseId];
-        Shipment storage shipment_ = shipments[shipmentId];
-        shipment_.shipmentId = shipmentId;
+        Shipment storage shipment_ = shipments[shipmentIdIndex];
+        shipment_.shipmentId = shipmentIdIndex;
         shipment_.purchaseId = _purchaseId;
         shipment_.quoteId = purchase_.quoteId;
         shipment_.orderId = purchase_.orderId;
         shipment_.upc = purchase_.upc;
         shipment_.shipper = msg.sender;
         shipment_.date = now;
-        shipmentIds[shipmentId] = true;
+        shipmentIds[shipmentIdIndex] = true;
 
         Order storage order_ = orders[shipment_.orderId];
         addPermission(RECIEVER_OF_ROLE, order_.buyerId, bytes32(shipment_.shipmentId));
 
-        emit Shipped(shipmentId);
-        shipmentId = shipmentId + 1;
+        emit Shipped(shipmentIdIndex);
+        shipmentIdIndex = shipmentIdIndex + 1;
 
     }
 
@@ -343,7 +342,6 @@ contract SupplyChain is AccessControl {
 
         Shipment storage shipment_ = shipments[_shipmentId];
         require(shipment_.delivered == false, ERROR_ALREADY_DELIVERED);
-        Purchase storage purchase_ = purchases[shipment_.purchaseId];
 
         shipment_.delivered = true;
         shipment_.dateDelivered = now;
